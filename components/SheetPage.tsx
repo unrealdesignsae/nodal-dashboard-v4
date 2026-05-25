@@ -13,9 +13,9 @@ type TabName = keyof typeof EMBEDDED_SHEET_DATA;
 type CellVal = string | number | null;
 type RawRow = { rowNumber: number; cells: CellVal[] };
 
-const ACCENT = ['#38f4ff', '#8b5cf6', '#b8ff63', '#ff4fd8', '#3e7dff', '#ffb347'];
+const ACCENT = ['#00d4ff', '#00b4d8', '#00d4ff', '#00b4d8', '#00d4ff', '#00b4d8'];
 const TAB_COLORS: Record<string, string> = {};
-TAB_NAMES.forEach((t, i) => { TAB_COLORS[t] = ACCENT[i % ACCENT.length]; });
+TAB_NAMES.forEach((t) => { TAB_COLORS[t] = '#00d4ff'; });
 
 // ── Row classification ────────────────────────────────────────────────────────
 
@@ -374,7 +374,7 @@ export function SheetPage({ tab }: { tab: TabName }) {
     error: 'Sync failed',
     'no-creds': 'No API key'
   };
-  const syncColors: Record<string, string> = { ok: '#b8ff63', error: '#ff4fd8', 'no-creds': '#ffb347' };
+  const syncColors: Record<string, string> = { ok: '#00ff88', error: '#ff4757', 'no-creds': '#00d4ff' };
 
   const totalVisible = filteredRows.filter(r => filled(getCells(r)).length > 0).length;
 
@@ -386,23 +386,22 @@ export function SheetPage({ tab }: { tab: TabName }) {
           <div className="sheet-breadcrumb">
             <Link href="/" className="pill"><ArrowLeft size={12} /> Dashboard</Link>
             <span className="breadcrumb-sep">/</span>
-            <span className="pill" style={{ color, borderColor: color + '44' }}>{tab}</span>
+            <span className="pill" style={{ color: '#00d4ff', borderColor: 'rgba(0,212,255,0.3)' }}>{tab}</span>
             {liveRows && <span className="pill live-pill">● LIVE</span>}
           </div>
-          <h1 className="sheet-title"><span className="gradient-text">{tab}</span></h1>
+          <h1 className="sheet-title">{tab}</h1>
           <p className="sheet-sub">{data.headline}</p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <button
-            className="btn secondary sync-btn"
+            className={`btn ${syncStatus === 'ok' ? 'ok' : syncStatus === 'error' || syncStatus === 'no-creds' ? 'error' : syncStatus === 'loading' ? 'loading' : ''}`}
             onClick={handleSync}
             disabled={syncStatus === 'loading'}
-            style={syncColors[syncStatus] ? { color: syncColors[syncStatus], borderColor: syncColors[syncStatus] + '55' } : {}}
           >
             {syncIcons[syncStatus]} {syncLabels[syncStatus]}
           </button>
           <a
-            className="btn secondary"
+            className="btn"
             href={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`}
             target="_blank"
             rel="noreferrer"
@@ -420,8 +419,8 @@ export function SheetPage({ tab }: { tab: TabName }) {
           { label: 'Columns', value: data.maxCols },
           { label: 'Qty total', value: Math.round(data.metrics.quantityTotal) },
         ].map((s, i) => (
-          <div key={i} className="stat-chip glass-card">
-            <strong style={{ color: ACCENT[i % 4] }}>{s.value}</strong>
+          <div key={i} className="stat-chip">
+            <strong style={{ color: '#00d4ff' }}>{s.value}</strong>
             <span>{s.label}</span>
           </div>
         ))}

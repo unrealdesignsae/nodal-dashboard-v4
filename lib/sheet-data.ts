@@ -13,7 +13,23 @@ export const TAB_NAMES = [
   "BROADCAST",
   "STAGING"
 ] as const;
-export const EMBEDDED_SHEET_DATA = {
+
+export type TabName = typeof TAB_NAMES[number];
+export type SheetCell = string | number | boolean | null;
+export type SheetRow = { rowNumber: number; cells: SheetCell[] };
+export type SheetTab = {
+  title: string;
+  headline: string;
+  rowCount: number;
+  nonEmptyRows: number;
+  maxCols: number;
+  rows: SheetRow[];
+  metrics: { sections: number; quantityTotal: number };
+  sections: unknown[];
+};
+export type SheetData = Record<TabName, SheetTab>;
+
+export const EMBEDDED_SHEET_DATA: SheetData = {
   "OVERVIEW": {
     "title": "OVERVIEW",
     "headline": "EC26 ELECTRIC CASTLE MAINSTAGE — ADVANCING SHEET",

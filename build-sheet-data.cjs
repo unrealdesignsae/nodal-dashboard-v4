@@ -123,7 +123,23 @@ async function main() {
   // Generate TypeScript file
   const ts = `export const SHEET_ID = "${SHEET_ID}";
 export const TAB_NAMES = ${JSON.stringify(TAB_NAMES, null, 2)} as const;
-export const EMBEDDED_SHEET_DATA = ${JSON.stringify(embeddedData, null, 2)};
+
+export type TabName = typeof TAB_NAMES[number];
+export type SheetCell = string | number | boolean | null;
+export type SheetRow = { rowNumber: number; cells: SheetCell[] };
+export type SheetTab = {
+  title: string;
+  headline: string;
+  rowCount: number;
+  nonEmptyRows: number;
+  maxCols: number;
+  rows: SheetRow[];
+  metrics: { sections: number; quantityTotal: number };
+  sections: unknown[];
+};
+export type SheetData = Record<TabName, SheetTab>;
+
+export const EMBEDDED_SHEET_DATA: SheetData = ${JSON.stringify(embeddedData, null, 2)};
 export const DASHBOARD_KPIS = ${JSON.stringify(DASHBOARD_KPIS, null, 2)};
 export const DASHBOARD_ANALYTICS = ${JSON.stringify(DASHBOARD_ANALYTICS, null, 2)};
 `;

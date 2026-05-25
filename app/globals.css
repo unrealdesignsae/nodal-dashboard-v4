@@ -4691,3 +4691,178 @@ ul, ol { list-style: none; }
     linear-gradient(rgba(255,31,61,0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,31,61,0.035) 1px, transparent 1px);
 }
+
+/* Global weight + red/white emphasis pass */
+:root,
+[data-theme="dark"],
+[data-theme="light"] {
+  --red-surface: #ff1f3d;
+  --red-surface-deep: #d60024;
+  --red-surface-dark: #9f001b;
+}
+
+body,
+button,
+input,
+textarea,
+select,
+.nav-item,
+.btn,
+.theme-toggle,
+.tbl,
+.equipment-table,
+.timeline-table,
+.mobile-menu-panel,
+.mobile-menu-trigger {
+  font-weight: 560;
+}
+
+.page-title,
+.old-section-title,
+.dash-card-title,
+.dash-stat-pill-value,
+.metric-value,
+.metric-discipline,
+.panel-header,
+.section-header,
+.d3-hero-title,
+.d3-stat-value,
+.d3-bento-title,
+.mobile-menu-title,
+.mobile-menu-card span,
+.mobile-menu-row span {
+  font-weight: 850;
+}
+
+/* Red title/header moments with white type */
+.dash-card-header,
+.panel-header,
+.section-header,
+.htl-header,
+.old-section-head,
+.d3-bento-head {
+  background: linear-gradient(90deg, var(--red-surface) 0%, var(--red-surface-deep) 100%);
+  border-color: rgba(0,0,0,0.22);
+  color: #fff;
+}
+
+.dash-card-header *,
+.panel-header *,
+.section-header *,
+.htl-header *,
+.old-section-head *,
+.d3-bento-head *,
+.dash-card-title,
+.dash-card-badge {
+  color: #fff !important;
+}
+
+.dash-card-header .dash-card-accent-bar,
+.htl-header .dash-card-accent-bar,
+.d3-bento-head-accent {
+  background: #fff !important;
+}
+
+/* Small cards / KPI cards as red command tiles */
+.dash-stat-pill,
+.metric-card,
+.d3-stat-pill {
+  background: linear-gradient(180deg, var(--red-surface) 0%, var(--red-surface-deep) 100%);
+  border-color: rgba(0,0,0,0.24);
+  color: #fff;
+}
+
+.dash-stat-pill *,
+.metric-card *,
+.d3-stat-pill * {
+  color: #fff !important;
+}
+
+.dash-stat-pill-accent,
+.metric-card::before,
+.d3-stat-glow {
+  background: rgba(255,255,255,0.9) !important;
+}
+
+.dash-stat-pill:hover,
+.metric-card:hover,
+.d3-stat-pill:hover {
+  border-color: rgba(255,255,255,0.55);
+  box-shadow: 0 12px 30px rgba(214,0,36,0.20), inset 0 1px 0 rgba(255,255,255,0.24);
+}
+
+/* Footer is an explicit red brand block in both modes */
+.nodal-footer,
+[data-theme="dark"] .nodal-footer,
+[data-theme="light"] .nodal-footer {
+  background: linear-gradient(180deg, var(--red-surface) 0%, var(--red-surface-deep) 100%) !important;
+  border-top-color: rgba(0,0,0,0.35) !important;
+  color: #fff !important;
+}
+
+.nodal-footer *,
+[data-theme="dark"] .nodal-footer *,
+[data-theme="light"] .nodal-footer * {
+  color: #fff !important;
+  font-weight: 800;
+}
+
+.nodal-footer-link svg,
+[data-theme="light"] .nodal-footer-link svg {
+  stroke: #fff !important;
+  opacity: 0.95;
+}
+
+.nodal-footer-brief-badge {
+  background: rgba(255,255,255,0.14) !important;
+  border-color: rgba(255,255,255,0.35) !important;
+}
+
+.nodal-footer-cta-link {
+  border-bottom-color: rgba(255,255,255,0.55) !important;
+}
+
+/* Mobile menu stays red, now with white text in both modes */
+@media (max-width: 760px) {
+  .mobile-menu-trigger,
+  .mobile-menu-panel,
+  [data-theme="light"] .mobile-menu-trigger,
+  [data-theme="light"] .mobile-menu-panel {
+    background: linear-gradient(180deg, var(--red-surface) 0%, var(--red-surface-deep) 100%) !important;
+    color: #fff !important;
+  }
+
+  .mobile-menu-trigger *,
+  .mobile-menu-panel *,
+  [data-theme="light"] .mobile-menu-trigger *,
+  [data-theme="light"] .mobile-menu-panel * {
+    color: #fff !important;
+  }
+
+  .mobile-menu-trigger-icon,
+  .mobile-menu-close,
+  [data-theme="light"] .mobile-menu-trigger-icon,
+  [data-theme="light"] .mobile-menu-close {
+    background: #fff !important;
+    color: var(--red-surface-deep) !important;
+    border-color: rgba(255,255,255,0.5) !important;
+  }
+
+  .mobile-menu-card,
+  .mobile-menu-row,
+  .mobile-menu-sheet-link,
+  [data-theme="light"] .mobile-menu-card,
+  [data-theme="light"] .mobile-menu-row,
+  [data-theme="light"] .mobile-menu-sheet-link {
+    background: rgba(255,255,255,0.13) !important;
+    border-color: rgba(255,255,255,0.28) !important;
+  }
+
+  .mobile-menu-card.active,
+  .mobile-menu-row.active,
+  [data-theme="light"] .mobile-menu-card.active,
+  [data-theme="light"] .mobile-menu-row.active {
+    background: rgba(255,255,255,0.24) !important;
+    border-color: rgba(255,255,255,0.62) !important;
+  }
+}

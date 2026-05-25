@@ -329,7 +329,7 @@ ul, ol { list-style: none; }
 .main-content {
   grid-column: 2;
   grid-row: 2;
-  padding: 36px 40px;
+  padding: 20px 28px 40px;
   overflow-y: auto;
   position: relative;
 }
@@ -1159,26 +1159,26 @@ ul, ol { list-style: none; }
 /* --- OLD DASHBOARD EXACT STYLES (from ec26-dashboard-v2) --- */
 
 /* Card */
+/* ── Unified card (same as db-card) ── */
 .card {
-  background: #0F1525;
-  border: 1px solid #1C2236;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 20px 22px;
-  position: relative;
   overflow: hidden;
-  transition: border-color 0.2s;
-  margin-bottom: 18px;
+  transition: border-color 150ms;
+  margin-bottom: 14px;
 }
+.card:hover { border-color: var(--border-hover); }
+
+/* top accent line */
 .card::before {
   content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
+  display: block;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(118,239,246,0.4), transparent);
-  opacity: 0.3;
-  transition: opacity 0.2s;
+  background: linear-gradient(90deg, var(--accent), transparent 60%);
+  opacity: 0.35;
+  transition: opacity 200ms;
 }
-.card:hover { border-color: #2A3350; }
 .card:hover::before { opacity: 0.7; }
 
 .card-head {
@@ -1186,37 +1186,42 @@ ul, ol { list-style: none; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .card-title {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .card-title-large {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: -0.005em;
   color: var(--text);
   text-transform: none;
+  letter-spacing: 0;
 }
 
 .card-tag {
   font-family: var(--font-mono);
   font-size: 9.5px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
-  padding: 3px 8px;
+  padding: 2px 8px;
   border: 1px solid var(--border);
   border-radius: 3px;
   text-transform: uppercase;
+  background: rgba(0,212,255,0.04);
 }
+
+/* inner card padding wrapper used by table/kv */
+.card-body { padding: 14px 18px 16px; }
 
 /* Equipment table */
 .tbl-wrap {

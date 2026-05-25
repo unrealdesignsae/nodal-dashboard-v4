@@ -245,9 +245,9 @@ function TBDTracker({ stats }: { stats: ReturnType<typeof getTBDStats> }) {
         </div>
       </div>
 
-      {/* Per-dept breakdown */}
+      {/* Per-dept breakdown — only show depts with TBD items */}
       <div className="tbd-dept-list">
-        {stats.byDept.map(d => {
+        {stats.byDept.filter(d => d.tbd > 0).map(d => {
           const dp = d.total > 0 ? Math.round((1 - d.tbd / d.total) * 100) : 100;
           return (
             <Link key={d.dept} href={`/sheet/${encodeURIComponent(d.dept)}`} className="tbd-dept-row">
@@ -257,15 +257,15 @@ function TBDTracker({ stats }: { stats: ReturnType<typeof getTBDStats> }) {
                   className="tbd-mini-fill"
                   style={{
                     width: `${animPct > 0 ? dp : 0}%`,
-                    background: dp > 70 ? '#00ff88' : dp > 40 ? '#f0b40a' : '#ff4757',
-                    transition: `width 1s ease ${Math.random() * 0.3 + 0.2}s`,
+                    background: dp > 70 ? '#f0b40a' : '#ff4757',
+                    transition: `width 1s ease 0.2s`,
                   }}
                 />
               </div>
-              <span className="tbd-dept-pct" style={{ color: dp > 70 ? '#00ff88' : dp > 40 ? '#f0b40a' : '#ff4757' }}>
+              <span className="tbd-dept-pct" style={{ color: dp > 70 ? '#f0b40a' : '#ff4757' }}>
                 {dp}%
               </span>
-              {d.tbd > 0 && <span className="tbd-flag">⚠ {d.tbd}</span>}
+              <span className="tbd-flag">⚠ {d.tbd}</span>
             </Link>
           );
         })}

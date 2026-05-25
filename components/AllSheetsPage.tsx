@@ -171,10 +171,12 @@ function DisciplineSection({ tab, query }: { tab: TabName; query: string }) {
         return (
           <div key={sec.title + i} className="card">
             <div className="card-head">
-              <span className="card-title card-title-large">{sec.title || `Section ${i + 1}`}</span>
+              <span className="card-title">{sec.title || `Section ${i + 1}`}</span>
               <span className="card-tag">{nonempty.length} entries</span>
             </div>
-            {hasKVPattern ? <KVGrid rows={nonempty} /> : <EquipmentTable rows={nonempty} headers={sec.headers} />}
+            <div className="card-body">
+              {hasKVPattern ? <KVGrid rows={nonempty} /> : <EquipmentTable rows={nonempty} headers={sec.headers} />}
+            </div>
           </div>
         );
       })}

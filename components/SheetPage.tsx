@@ -166,10 +166,10 @@ function OldCard({ title, tag, children }: { title: string; tag?: string; childr
   return (
     <div className="card">
       <div className="card-head">
-        <span className="card-title card-title-large">{title}</span>
+        <span className="card-title">{title}</span>
         {tag && <span className="card-tag">{tag}</span>}
       </div>
-      {children}
+      <div className="card-body">{children}</div>
     </div>
   );
 }

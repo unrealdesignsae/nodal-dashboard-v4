@@ -145,10 +145,49 @@
   filter: drop-shadow(0 4px 24px rgba(0, 80, 130, 0.15));
 }
 
-/* Footer light mode */
+/* Footer light mode — blue bg, black text */
 [data-theme="light"] .nodal-footer {
-  background: #0a1222;
-  border-top-color: rgba(0, 119, 168, 0.3);
+  background: #c8ddf0;
+  border-top-color: rgba(0, 80, 130, 0.25);
+}
+[data-theme="light"] .nodal-footer-logo {
+  filter: none;
+  opacity: 1;
+}
+[data-theme="light"] .nodal-footer-company {
+  color: #0a1222;
+}
+[data-theme="light"] .nodal-footer-sub {
+  color: #2d3a52;
+}
+[data-theme="light"] .nodal-footer-tagline {
+  color: #5a6580;
+}
+[data-theme="light"] .nodal-footer-col-label {
+  color: #005f88;
+  opacity: 1;
+}
+[data-theme="light"] .nodal-footer-link {
+  color: #0a1222;
+}
+[data-theme="light"] .nodal-footer-link:hover {
+  color: #005f88;
+}
+[data-theme="light"] .nodal-footer-link svg {
+  opacity: 0.7;
+  stroke: #2d3a52;
+}
+[data-theme="light"] .nodal-footer-brief-badge {
+  color: #005f88;
+  background: rgba(0, 95, 136, 0.1);
+  border-color: rgba(0, 95, 136, 0.3);
+}
+[data-theme="light"] .nodal-footer-cta-link {
+  color: #005f88;
+  border-bottom-color: rgba(0, 95, 136, 0.35);
+}
+[data-theme="light"] .nodal-footer-meta {
+  color: #5a6580;
 }
 
 /* ─── THEME TRANSITION ─── */

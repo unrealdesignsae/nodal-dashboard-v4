@@ -43,16 +43,10 @@ export function NodalFooter() {
         {/* Links */}
         <div className="nodal-footer-col">
           <div className="nodal-footer-col-label">LINKS</div>
-          {[
-            { label: 'nodaltc.com', href: 'https://nodaltc.com' },
-            { label: 'nodaltech.ae', href: 'https://nodaltech.ae' },
-            { label: '@nodaltech', href: 'https://twitter.com/nodaltech' },
-          ].map(({ label, href }) => (
-            <a key={label} href={href} target="_blank" rel="noreferrer" className="nodal-footer-link">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-              <span>{label}</span>
-            </a>
-          ))}
+          <a href="https://nodaltc.com" target="_blank" rel="noreferrer" className="nodal-footer-link">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            <span>nodaltc.com</span>
+          </a>
         </div>
 
         {/* Accepting briefs */}

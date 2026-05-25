@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft, ArrowRight, ExternalLink, Search,
-  ChevronDown, ChevronUp, Hash, RefreshCw,
+  Hash, RefreshCw,
   CheckCircle, AlertCircle, Wifi
 } from 'lucide-react';
 import { EMBEDDED_SHEET_DATA, SHEET_ID, TAB_NAMES } from '@/lib/sheet-data';
@@ -250,33 +250,33 @@ function RowRenderer({ row, color, isScheduleTab }: {
   }
 }
 
-// ── SectionGroup ──────────────────────────────────────────────────────────────
+// ── Flat Section (no accordion) ──────────────────────────────────────────────
 
-function SectionGroup({ title, rows, color, defaultOpen = true, isScheduleTab }: {
-  title: string; rows: RawRow[]; color: string; defaultOpen?: boolean; isScheduleTab?: boolean;
+function FlatSection({ title, rows, color, isScheduleTab }: {
+  title: string; rows: RawRow[]; color: string; isScheduleTab?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   const nonEmpty = rows.filter(r => filled(getCells(r)).length > 0);
   if (nonEmpty.length === 0) return null;
 
   return (
-    <div className="section-group">
-      <button className="section-group-header" onClick={() => setOpen(!open)}>
-        <span className="sg-dot" style={{ background: color, boxShadow: `0 0 8px ${color}` }} />
-        <span className="sg-title">{title}</span>
-        <span className="sg-count">{nonEmpty.length} rows</span>
-        {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-      </button>
-      {open && (
-        <div className="section-group-body">
-          {nonEmpty.map(row => (
-            <RowRenderer key={row.rowNumber} row={row} color={color} isScheduleTab={isScheduleTab} />
-          ))}
-        </div>
-      )}
+    <div className="flat-section">
+      {/* Section divider header */}
+      <div className="flat-section-header">
+        <span className="flat-section-dot" style={{ background: color }} />
+        <span className="flat-section-title">{title}</span>
+        <span className="flat-section-line" />
+        <span className="flat-section-count">{nonEmpty.length}</span>
+      </div>
+      {/* All rows rendered flat */}
+      <div className="flat-section-body">
+        {nonEmpty.map(row => (
+          <RowRenderer key={row.rowNumber} row={row} color={color} isScheduleTab={isScheduleTab} />
+        ))}
+      </div>
     </div>
   );
 }
+
 
 // ── SheetPage ─────────────────────────────────────────────────────────────────
 
@@ -447,12 +447,11 @@ export function SheetPage({ tab }: { tab: TabName }) {
           <div className="empty-state">No matching rows found.</div>
         ) : (
           groups.map((g, i) => (
-            <SectionGroup
+            <FlatSection
               key={g.title + i}
               title={g.title}
               rows={g.rows}
               color={color}
-              defaultOpen={i === 0}
               isScheduleTab={isScheduleTab}
             />
           ))

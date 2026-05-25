@@ -926,3 +926,59 @@ ul, ol { list-style: none; }
 .empty-state { padding: 40px; text-align: center; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted); border: 1px dashed var(--border); border-radius: var(--radius); }
 .tab-nav-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; margin-top: 16px; border-top: 1px solid var(--border); }
 .glass-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
+
+/* --- FLAT SECTION (replaces accordion) --- */
+.flat-section {
+  margin-bottom: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.flat-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(0,212,255,0.04);
+  border-bottom: 1px solid var(--border);
+}
+
+.flat-section-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(0,212,255,0.6);
+}
+
+.flat-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex: 1;
+}
+
+.flat-section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  max-width: 120px;
+}
+
+.flat-section-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  background: rgba(0,212,255,0.06);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.flat-section-body {
+  /* all rows render directly here */
+}

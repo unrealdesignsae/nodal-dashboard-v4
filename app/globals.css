@@ -1725,3 +1725,11 @@ ul, ol { list-style: none; }
   color: var(--text-muted); letter-spacing: 0.08em;
   text-align: center; margin-top: 32px;
 }
+
+/* -- All-sheets page -- */
+.all-disc-block { margin-bottom: 0; }
+.disc-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 40px 0;
+}

@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { TAB_NAMES, SHEET_ID } from '@/lib/sheet-data';
 
-/* Icons as inline SVGs — no extra dep */
 const icons: Record<string, string> = {
+  dashboard:   'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
+  sheets:      'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 5h6M9 12h6M9 16h4',
   OVERVIEW:    'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z',
   Sheet1:      'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
   AUDIO:       'M9 18V5l12-2v13M6 15.5A2.5 2.5 0 108.5 18 2.5 2.5 0 006 15.5zM18 13.5A2.5 2.5 0 1020.5 16 2.5 2.5 0 0018 13.5z',
@@ -27,9 +28,7 @@ const DISPLAY_NAMES: Record<string, string> = {
 
 const SHEETS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 
-export function Sidebar({ active = 'dashboard' }: { active?: string }) {
-  const allTabs: (typeof TAB_NAMES[number] | 'dashboard')[] = ['dashboard', ...TAB_NAMES];
-
+export function Sidebar({ active = 'sheets' }: { active?: string }) {
   return (
     <aside className="sidebar">
       {/* Logo */}
@@ -38,22 +37,28 @@ export function Sidebar({ active = 'dashboard' }: { active?: string }) {
         <span className="sidebar-logo-text">NODAL TC</span>
       </div>
 
-      {/* Discipline nav */}
-      <div className="sidebar-section-label">DISCIPLINES</div>
-      <nav className="sidebar-nav" aria-label="Dashboard navigation">
-        {/* Overview */}
-        <Link
-          href="/"
-          className={`nav-item ${active === 'dashboard' ? 'active' : ''}`}
-        >
+      {/* Top nav — Dashboard + All Sheets */}
+      <div className="sidebar-section-label">MAIN</div>
+      <nav aria-label="Main navigation">
+        <Link href="/dashboard" className={`nav-item ${active === 'dashboard' ? 'active' : ''}`}>
           <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d={icons['OVERVIEW']} />
+            <path d={icons['dashboard']} />
           </svg>
-          <span className="nav-label">OVERVIEW</span>
+          <span className="nav-label">DASHBOARD</span>
         </Link>
 
-        {/* All tabs */}
-        {TAB_NAMES.filter(t => t !== 'OVERVIEW').map((tab) => (
+        <Link href="/" className={`nav-item ${active === 'sheets' ? 'active' : ''}`}>
+          <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d={icons['sheets']} />
+          </svg>
+          <span className="nav-label">ALL SHEETS</span>
+        </Link>
+      </nav>
+
+      {/* Discipline nav */}
+      <div className="sidebar-section-label" style={{ marginTop: 8 }}>DISCIPLINES</div>
+      <nav className="sidebar-nav" aria-label="Discipline navigation">
+        {TAB_NAMES.map((tab) => (
           <Link
             key={tab}
             href={`/sheet/${encodeURIComponent(tab)}`}

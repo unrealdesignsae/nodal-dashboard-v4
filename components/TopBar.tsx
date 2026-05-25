@@ -15,7 +15,7 @@ export function TopBar({ activeTab }: { activeTab?: string }) {
   async function handleSync() {
     setStatus('loading');
     try {
-      const url = activeTab
+      const url = activeTab && activeTab !== 'dashboard'
         ? `/api/sheets/${encodeURIComponent(activeTab)}`
         : '/api/sheets/OVERVIEW';
       const res = await fetch(url, { cache: 'no-store' });

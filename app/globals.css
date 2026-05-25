@@ -4866,3 +4866,131 @@ select,
     border-color: rgba(255,255,255,0.62) !important;
   }
 }
+
+/* Dark mode correction — no red surfaces */
+[data-theme="dark"] {
+  --red-surface: var(--bg-card);
+  --red-surface-deep: var(--bg-secondary);
+  --red-surface-dark: var(--bg);
+}
+
+[data-theme="dark"] .dash-card-header,
+[data-theme="dark"] .panel-header,
+[data-theme="dark"] .section-header,
+[data-theme="dark"] .htl-header,
+[data-theme="dark"] .old-section-head,
+[data-theme="dark"] .d3-bento-head {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .dash-card-header *,
+[data-theme="dark"] .panel-header *,
+[data-theme="dark"] .section-header *,
+[data-theme="dark"] .htl-header *,
+[data-theme="dark"] .old-section-head *,
+[data-theme="dark"] .d3-bento-head *,
+[data-theme="dark"] .dash-card-title {
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .dash-card-badge,
+[data-theme="dark"] .badge,
+[data-theme="dark"] .nav-badge {
+  color: var(--accent) !important;
+  background: var(--accent-glow) !important;
+  border-color: var(--accent-border) !important;
+}
+
+[data-theme="dark"] .dash-card-header .dash-card-accent-bar,
+[data-theme="dark"] .htl-header .dash-card-accent-bar,
+[data-theme="dark"] .d3-bento-head-accent,
+[data-theme="dark"] .dash-stat-pill-accent,
+[data-theme="dark"] .metric-card::before,
+[data-theme="dark"] .section-header::before,
+[data-theme="dark"] .old-section-head::before {
+  background: var(--accent) !important;
+}
+
+[data-theme="dark"] .dash-stat-pill,
+[data-theme="dark"] .metric-card,
+[data-theme="dark"] .d3-stat-pill {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .dash-stat-pill *,
+[data-theme="dark"] .metric-card *,
+[data-theme="dark"] .d3-stat-pill * {
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .dash-stat-pill-value,
+[data-theme="dark"] .metric-value,
+[data-theme="dark"] .d3-stat-value {
+  color: var(--accent) !important;
+}
+
+[data-theme="dark"] .dash-stat-pill:hover,
+[data-theme="dark"] .metric-card:hover,
+[data-theme="dark"] .d3-stat-pill:hover {
+  border-color: var(--border-hover) !important;
+  box-shadow: 0 0 24px var(--accent-glow) !important;
+}
+
+[data-theme="dark"] .nodal-footer {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-top-color: var(--border) !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+[data-theme="dark"] .nodal-footer-company { color: rgba(255,255,255,0.85) !important; }
+[data-theme="dark"] .nodal-footer-sub,
+[data-theme="dark"] .nodal-footer-link { color: rgba(255,255,255,0.5) !important; }
+[data-theme="dark"] .nodal-footer-tagline,
+[data-theme="dark"] .nodal-footer-meta { color: rgba(255,255,255,0.22) !important; }
+[data-theme="dark"] .nodal-footer-col-label,
+[data-theme="dark"] .nodal-footer-brief-badge,
+[data-theme="dark"] .nodal-footer-cta-link { color: var(--accent) !important; }
+[data-theme="dark"] .nodal-footer-brief-badge {
+  background: rgba(0,212,255,0.07) !important;
+  border-color: rgba(0,212,255,0.2) !important;
+}
+[data-theme="dark"] .nodal-footer-cta-link { border-bottom-color: rgba(0,212,255,0.3) !important; }
+[data-theme="dark"] .nodal-footer-link svg { stroke: currentColor !important; }
+
+@media (max-width: 760px) {
+  [data-theme="dark"] .mobile-menu-trigger,
+  [data-theme="dark"] .mobile-menu-panel {
+    background: color-mix(in oklch, var(--bg-secondary) 96%, black) !important;
+    border-color: var(--accent-border) !important;
+    color: var(--text) !important;
+  }
+
+  [data-theme="dark"] .mobile-menu-trigger *,
+  [data-theme="dark"] .mobile-menu-panel * {
+    color: var(--text) !important;
+  }
+
+  [data-theme="dark"] .mobile-menu-trigger-icon,
+  [data-theme="dark"] .mobile-menu-close {
+    background: var(--accent) !important;
+    color: #000 !important;
+    border-color: var(--accent-border) !important;
+  }
+
+  [data-theme="dark"] .mobile-menu-card,
+  [data-theme="dark"] .mobile-menu-row,
+  [data-theme="dark"] .mobile-menu-sheet-link {
+    background: var(--bg-card) !important;
+    border-color: var(--border) !important;
+  }
+
+  [data-theme="dark"] .mobile-menu-card.active,
+  [data-theme="dark"] .mobile-menu-row.active {
+    background: var(--accent-glow) !important;
+    border-color: var(--accent) !important;
+  }
+}

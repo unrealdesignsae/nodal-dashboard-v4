@@ -982,3 +982,92 @@ ul, ol { list-style: none; }
 .flat-section-body {
   /* all rows render directly here */
 }
+
+/* --- SECTION CARDS (table layout, matching screenshot) --- */
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.section-card-title {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 18px 24px 14px;
+  letter-spacing: 0.01em;
+}
+
+.section-card-table-wrap {
+  overflow-x: auto;
+}
+
+.section-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table-th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 8px 24px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,212,255,0.02);
+  white-space: nowrap;
+}
+
+.th-qty { width: 80px; }
+
+.data-row { border-bottom: 1px solid rgba(0,212,255,0.05); transition: background 120ms ease; }
+.data-row:last-child { border-bottom: none; }
+.data-row:hover { background: rgba(0,212,255,0.04); }
+
+.item-cell {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 13px 24px;
+  min-width: 160px;
+}
+
+.qty-cell {
+  padding: 13px 24px;
+  width: 80px;
+}
+
+.qty-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.data-cell {
+  padding: 13px 24px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.notes-cell {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.cell-empty {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.cell-empty.tbd {
+  font-style: italic;
+}

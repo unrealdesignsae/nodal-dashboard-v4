@@ -2,284 +2,241 @@
 
 import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  ArrowLeft, ArrowRight, ExternalLink, Search,
-  Hash, RefreshCw,
-  CheckCircle, AlertCircle, Wifi
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, Search, RefreshCw, CheckCircle, AlertCircle, Wifi } from 'lucide-react';
 import { EMBEDDED_SHEET_DATA, SHEET_ID, TAB_NAMES } from '@/lib/sheet-data';
 
 type TabName = keyof typeof EMBEDDED_SHEET_DATA;
 type CellVal = string | number | null;
 type RawRow = { rowNumber: number; cells: CellVal[] };
 
-const ACCENT = ['#00d4ff', '#00b4d8', '#00d4ff', '#00b4d8', '#00d4ff', '#00b4d8'];
-const TAB_COLORS: Record<string, string> = {};
-TAB_NAMES.forEach((t) => { TAB_COLORS[t] = '#00d4ff'; });
-
-// ── Row classification ────────────────────────────────────────────────────────
-
-function getCells(row: RawRow): string[] {
-  return row.cells.map(c => c === null || c === undefined ? '' : String(c));
+function cell(v: CellVal): string {
+  return v === null || v === undefined ? '' : String(v).trim();
 }
 
-function filled(cells: string[]) {
-  return cells.filter(c => c.trim().length > 0);
+function filledCells(row: RawRow): string[] {
+  return row.cells.map(c => cell(c)).filter(Boolean);
 }
 
-type RowKind = 'empty' | 'section' | 'table-header' | 'kv' | 'equipment' | 'rule' | 'title';
+// ── Detect if a row is a section title (single non-empty cell, all caps or heading-like) ──
+function isSectionTitle(row: RawRow): string | null {
+  const f = filledCells(row);
+  if (f.length !== 1) return null;
+  const s = f[0];
+  if (s.length < 3 || s.length > 80) return null;
+  if (/^\d+[\.\)]\s+[A-Z]/.test(s) && s.length > 20) return null; // numbered rule, not title
+  if (s === s.toUpperCase() && /[A-Z]{2,}/.test(s)) return s;
+  if (/[A-Z][a-z]/.test(s) && (s.includes(' ') || s.includes('&') || s.includes('/'))) return s;
+  if (s.endsWith(':') && s.length < 50) return s.replace(/:$/, '');
+  return null;
+}
 
-function classifyRow(cells: string[]): RowKind {
-  const f = filled(cells);
-  if (f.length === 0) return 'empty';
+// ── Detect table-header row ──
+const HEADER_KEYWORDS = ['item', 'equipment', 'qty', 'quantity', 'brand', 'model', 'specs',
+  'notes', 'description', 'signal', 'feed', 'department', 'date', 'day', 'task',
+  'details', 'name', 'type', 'screen', 'size', 'tiles', 'phase', 'kw', 'location',
+  'role', 'contact', 'phone', 'email', 'width', 'height', 'resolution'];
 
-  const first = f[0].trim();
-
-  // Single cell
-  if (f.length === 1) {
-    // Numbered rule (e.g. "1. All feeds must...")
-    if (/^\d+[\.\)]\s+[A-Z]/.test(first) && first.length > 20) return 'rule';
-    // Section header: ALL CAPS or title line
-    return 'section';
-  }
-
-  // Table header row: multiple short uppercase/keyword cells
-  const HEADER_KEYWORDS = ['equipment', 'item', 'description', 'qty', 'notes', 'model',
-    'quantity', 'brand', 'specs', 'screen', 'size', 'pixel', 'resolution',
-    'tiles', 'signal', 'feed', 'department', 'connection', 'phase', 'kw', 'location',
-    'date', 'day', 'task', 'details', 'name', 'type', 'width', 'height'];
+function isHeaderRow(row: RawRow): boolean {
+  const f = filledCells(row);
+  if (f.length < 2) return false;
   const joined = f.join(' ').toLowerCase();
-  const matchCount = HEADER_KEYWORDS.filter(k => joined.includes(k)).length;
-  if (matchCount >= 2 && f.every(c => c.length < 40)) return 'table-header';
+  const matches = HEADER_KEYWORDS.filter(k => joined.includes(k)).length;
+  return matches >= 2 && f.every(c => c.length < 40);
+}
 
-  // Key-value: first cell is label (no colon but short), second is value, maybe 3rd empty then value
-  // Pattern: ['Stage Type:', '', 'TGV1 Megaforce'] or ['Project Name:', '', 'EC26...']
-  if (cells.length >= 2) {
-    const nonEmpty = cells.filter(c => c.trim());
-    if (nonEmpty.length <= 3 && (first.endsWith(':') || first.length < 35)) {
-      // Check if it looks like key: value
-      const valueIdx = cells.findIndex((c, i) => i > 0 && c.trim().length > 0);
-      if (valueIdx !== -1) return 'kv';
+// ── Find first numeric qty cell index ──
+function findQtyIdx(cells: string[]): number {
+  return cells.findIndex((c, i) => i > 0 && /^\d+(\.\d+)?$/.test(c) && c.length < 7);
+}
+
+// ── Group rows into sections ──
+type Section = { title: string; headers: string[]; rows: RawRow[] };
+
+function groupIntoSections(allRows: RawRow[]): Section[] {
+  const sections: Section[] = [];
+  let title = 'Overview';
+  let headers: string[] = [];
+  let rows: RawRow[] = [];
+
+  for (const row of allRows) {
+    const f = filledCells(row);
+    if (f.length === 0) continue;
+
+    const sectionTitle = isSectionTitle(row);
+    if (sectionTitle) {
+      if (rows.length > 0 || headers.length > 0) {
+        sections.push({ title, headers, rows });
+      }
+      title = sectionTitle;
+      headers = [];
+      rows = [];
+      continue;
     }
+
+    if (isHeaderRow(row)) {
+      headers = row.cells.map(c => cell(c));
+      continue;
+    }
+
+    rows.push(row);
   }
 
-  // Equipment row: has a quantity number somewhere after col 0
-  const hasQty = cells.some((c, i) => i > 0 && /^\d+(\.\d+)?$/.test(c.trim()) && c.trim().length < 6);
-  if (hasQty) return 'equipment';
+  if (rows.length > 0 || headers.length > 0) {
+    sections.push({ title, headers, rows });
+  }
 
-  // Default: equipment/data row
-  return 'equipment';
+  return sections;
 }
 
-// ── Section boundary detection ────────────────────────────────────────────────
-
-function isSectionBoundary(s: string): boolean {
-  // Numbered rule — not a section
-  if (/^\d+[\.\)]\s+[A-Z]/.test(s) && s.length > 20) return false;
-  // Very short — not a section
-  if (s.length <= 3) return false;
-  // Has a digit pattern suggesting equipment item — not a section
-  if (/\b(Camera|VX|SDI|FOH|IEM|DMX)\s*\d/.test(s)) return false;
-  // All caps phrase (multiple words or single word > 4 chars) — IS a section
-  if (s === s.toUpperCase() && /[A-Z]{2,}/.test(s) && s.length > 4) return true;
-  // Title-case heading with space, &, /, or — — IS a section
-  if (/[A-Z][a-z]/.test(s) && (s.includes(' ') || s.includes('&') || s.includes('/'))) return true;
-  // Ends with : — sub-header, IS a section
-  if (s.endsWith(':')) return true;
-  // Default: treat as data
-  return false;
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function EmptyBadge() {
-  return <span style={{ color: '#555', fontStyle: 'italic', fontSize: 12 }}>TBD</span>;
-}
-
-function SectionHeader({ label, color }: { label: string; color: string }) {
-  return (
-    <div className="section-divider">
-      <span className="section-divider-line" style={{ background: color }} />
-      <span className="section-divider-text" style={{ color }}>{label}</span>
-      <span className="section-divider-line" style={{ background: color }} />
-    </div>
-  );
-}
-
-function TableHeaderRow({ cells }: { cells: string[] }) {
-  const f = filled(cells);
-  return (
-    <div className="row-header">
-      {f.map((c, i) => <span key={i} className="row-header-cell">{c}</span>)}
-    </div>
-  );
-}
-
-function RuleRow({ text }: { text: string }) {
-  return (
-    <div className="rule-row">
-      <span className="rule-num">{text.match(/^(\d+[\.\)])/)?.[1]}</span>
-      <span className="rule-text">{text.replace(/^\d+[\.\)]\s*/, '')}</span>
-    </div>
-  );
-}
-
-function KVRow({ cells, color }: { cells: string[]; color: string }) {
-  const key = cells[0]?.replace(/:$/, '').trim();
-  const value = cells.find((c, i) => i > 0 && c.trim().length > 0)?.trim();
-  return (
-    <div className="kv-row">
-      <span className="kv-key">{key}</span>
-      <span className="kv-sep" style={{ color }} />
-      <span className="kv-value">{value ?? <EmptyBadge />}</span>
-    </div>
-  );
-}
-
-function EquipmentRow({ cells, color }: { cells: string[]; color: string }) {
-  const f = filled(cells);
+// ── Render a single data row as a table row ──
+function DataRow({ row, headers, color }: { row: RawRow; headers: string[]; color: string }) {
+  const cells = row.cells.map(c => cell(c));
+  const f = cells.filter(Boolean);
   if (f.length === 0) return null;
 
-  const name = f[0];
+  const itemName = cells[0] || f[0] || '';
+  if (!itemName) return null;
 
-  // If only one non-empty cell — placeholder row
-  if (f.length === 1) {
+  // If headers exist, align cells to header columns
+  if (headers.length >= 2) {
+    const visibleHeaders = headers.filter(Boolean);
     return (
-      <div className="equip-name-only">
-        <span className="equip-name-dot" style={{ background: color + '99' }} />
-        <span className="equip-name-text" style={{ color: color + 'cc' }}>{name}</span>
-        <span className="equip-tbd">TBD</span>
-      </div>
+      <tr className="data-row">
+        {visibleHeaders.map((h, hi) => {
+          const v = cells[hi] ?? '';
+          const hLower = h.toLowerCase();
+          const isQty = /qty|quantity/.test(hLower);
+          const isItem = hi === 0;
+          const isEmpty = !v;
+
+          return (
+            <td key={hi} className={`data-cell${isQty ? ' qty-cell' : ''}${isItem ? ' item-cell' : ''}`}>
+              {isEmpty
+                ? <span className="cell-empty">—</span>
+                : isQty
+                  ? <span className="qty-value" style={{ color }}>{v}</span>
+                  : v}
+            </td>
+          );
+        })}
+      </tr>
     );
   }
 
-  // Multi-column data row (screen specs, etc.) — show name + all values as chips
-  if (f.length >= 5) {
-    const tags = f.slice(1);
-    return (
-      <div className="equip-row">
-        <div className="equip-main">
-          <span className="equip-name">{name}</span>
-        </div>
-        <div className="equip-meta">
-          {tags.map((t, i) => (
-            <span key={i} className="equip-brand">{t}</span>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Standard equipment row: name, optional qty, brand, specs
-  const qtyIdx = cells.findIndex((c, i) => i > 0 && /^\d+(\.\d+)?$/.test(c.trim()) && c.trim().length < 7);
-  const qty = qtyIdx !== -1 ? cells[qtyIdx] : null;
-
-  const nonEmptyAfterFirst = cells
-    .map((c, i) => ({ c, i }))
-    .filter(({ c, i }) => i > 0 && c.trim() && !/^\d+$/.test(c.trim()));
-
-  const brand = nonEmptyAfterFirst[0]?.c;
-  const specs = nonEmptyAfterFirst.slice(1).map(x => x.c).filter(Boolean).join(' — ');
+  // No headers — detect structure manually
+  const qtyIdx = findQtyIdx(cells);
+  const qty = qtyIdx !== -1 ? cells[qtyIdx] : '';
+  const rest = cells.filter((_, i) => i !== 0 && i !== qtyIdx && cells[i]);
 
   return (
-    <div className="equip-row">
-      <div className="equip-main">
-        <span className="equip-name">{name}</span>
-        {qty && (
-          <span className="equip-qty" style={{ color, borderColor: color + '44' }}>
-            <Hash size={10} /> {qty}
-          </span>
-        )}
-      </div>
-      {(brand || specs) && (
-        <div className="equip-meta">
-          {brand && <span className="equip-brand">{brand}</span>}
-          {specs && <span className="equip-specs">{specs}</span>}
-        </div>
-      )}
-    </div>
+    <tr className="data-row">
+      <td className="item-cell">{itemName}</td>
+      <td className="qty-cell">
+        {qty ? <span className="qty-value" style={{ color }}>{qty}</span> : <span className="cell-empty">—</span>}
+      </td>
+      <td className="data-cell">{rest[0] || <span className="cell-empty">—</span>}</td>
+      <td className="data-cell">{rest.slice(1).join(' · ') || <span className="cell-empty tbd">TBD</span>}</td>
+    </tr>
   );
 }
 
-function ScheduleRow({ cells, color }: { cells: string[]; color: string }) {
-  // For Sheet1 — date-based workflow rows
-  const date = cells[0]?.trim();
-  const dayLabel = cells[1]?.trim();
-  const task = cells[2]?.trim();
-  const details = cells.slice(3).filter(c => c?.trim()).join(' · ');
+// ── Section Card ──
+function SectionCard({ section, color }: { section: Section; color: string }) {
+  const visibleHeaders = section.headers.filter(Boolean);
+  const hasHeaders = visibleHeaders.length >= 2;
+  const nonEmptyRows = section.rows.filter(r => filledCells(r).length > 0);
+  if (nonEmptyRows.length === 0 && !hasHeaders) return null;
+
+  // Determine display headers
+  const displayHeaders = hasHeaders
+    ? visibleHeaders
+    : ['ITEM', 'QTY', 'BRAND / MODEL', 'SPECS / NOTES'];
 
   return (
-    <div className="schedule-row">
-      <div className="schedule-date" style={{ color }}>
-        {date}
-        {dayLabel && <span className="schedule-daylabel">{dayLabel}</span>}
-      </div>
-      <div className="schedule-body">
-        {task && <div className="schedule-task">{task}</div>}
-        {details && <div className="schedule-details">{details}</div>}
-      </div>
-    </div>
-  );
-}
-
-// ── RowRenderer ───────────────────────────────────────────────────────────────
-
-function RowRenderer({ row, color, isScheduleTab }: {
-  row: RawRow; color: string; isScheduleTab?: boolean;
-}) {
-  const cells = getCells(row);
-  const f = filled(cells);
-  if (f.length === 0) return null;
-
-  if (isScheduleTab) {
-    // Sheet1 has date-based rows
-    if (f.length === 1 && f[0].length > 30) return <RuleRow text={f[0]} />;
-    if (/^\d+\/[A-Za-z]/.test(cells[0])) return <ScheduleRow cells={cells} color={color} />;
-  }
-
-  const kind = classifyRow(cells);
-
-  switch (kind) {
-    case 'empty': return null;
-    case 'section': return <SectionHeader label={f[0]} color={color} />;
-    case 'table-header': return <TableHeaderRow cells={cells} />;
-    case 'rule': return <RuleRow text={f[0]} />;
-    case 'kv': return <KVRow cells={cells} color={color} />;
-    case 'equipment': return <EquipmentRow cells={cells} color={color} />;
-    default: return <EquipmentRow cells={cells} color={color} />;
-  }
-}
-
-// ── Flat Section (no accordion) ──────────────────────────────────────────────
-
-function FlatSection({ title, rows, color, isScheduleTab }: {
-  title: string; rows: RawRow[]; color: string; isScheduleTab?: boolean;
-}) {
-  const nonEmpty = rows.filter(r => filled(getCells(r)).length > 0);
-  if (nonEmpty.length === 0) return null;
-
-  return (
-    <div className="flat-section">
-      {/* Section divider header */}
-      <div className="flat-section-header">
-        <span className="flat-section-dot" style={{ background: color }} />
-        <span className="flat-section-title">{title}</span>
-        <span className="flat-section-line" />
-        <span className="flat-section-count">{nonEmpty.length}</span>
-      </div>
-      {/* All rows rendered flat */}
-      <div className="flat-section-body">
-        {nonEmpty.map(row => (
-          <RowRenderer key={row.rowNumber} row={row} color={color} isScheduleTab={isScheduleTab} />
-        ))}
+    <div className="section-card">
+      <div className="section-card-title">{section.title}</div>
+      <div className="section-card-table-wrap">
+        <table className="section-table">
+          <thead>
+            <tr>
+              {displayHeaders.map((h, i) => (
+                <th key={i} className={`table-th${/qty|quantity/i.test(h) ? ' th-qty' : ''}`}>
+                  {h.toUpperCase()}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {nonEmptyRows.map(row => (
+              <DataRow
+                key={row.rowNumber}
+                row={row}
+                headers={hasHeaders ? visibleHeaders : []}
+                color={color}
+              />
+            ))}
+            {nonEmptyRows.length === 0 && (
+              <tr>
+                <td colSpan={displayHeaders.length} className="data-cell" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>
+                  No data
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
+// ── Schedule card for Sheet1 ──
+function ScheduleCard({ section, color }: { section: Section; color: string }) {
+  const nonEmptyRows = section.rows.filter(r => filledCells(r).length > 0);
+  if (nonEmptyRows.length === 0) return null;
 
-// ── SheetPage ─────────────────────────────────────────────────────────────────
+  return (
+    <div className="section-card">
+      <div className="section-card-title">{section.title}</div>
+      <div className="section-card-table-wrap">
+        <table className="section-table">
+          <thead>
+            <tr>
+              <th className="table-th">DATE</th>
+              <th className="table-th">DAY</th>
+              <th className="table-th">TASK</th>
+              <th className="table-th">DETAILS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {nonEmptyRows.map(row => {
+              const cells = row.cells.map(c => cell(c));
+              const f = cells.filter(Boolean);
+              if (f.length === 0) return null;
+              const date = cells[0];
+              const day = cells[1];
+              const task = cells[2];
+              const details = cells.slice(3).filter(Boolean).join(' · ');
+              return (
+                <tr key={row.rowNumber} className="data-row">
+                  <td className="data-cell" style={{ color, fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+                    {date || <span className="cell-empty">—</span>}
+                  </td>
+                  <td className="data-cell" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--online)', textTransform: 'uppercase', fontSize: 12 }}>
+                    {day || <span className="cell-empty">—</span>}
+                  </td>
+                  <td className="item-cell">{task || <span className="cell-empty">—</span>}</td>
+                  <td className="data-cell notes-cell">{details || <span className="cell-empty tbd">—</span>}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
+// ── Main SheetPage ──
 export function SheetPage({ tab }: { tab: TabName }) {
   const [query, setQuery] = useState('');
   const [liveRows, setLiveRows] = useState<RawRow[] | null>(null);
@@ -287,7 +244,7 @@ export function SheetPage({ tab }: { tab: TabName }) {
   const [lastSync, setLastSync] = useState<string | null>(null);
 
   const data = EMBEDDED_SHEET_DATA[tab];
-  const color = TAB_COLORS[tab] ?? '#38f4ff';
+  const color = '#00d4ff';
   const tabIndex = TAB_NAMES.indexOf(tab as any);
   const prevTab = tabIndex > 0 ? TAB_NAMES[tabIndex - 1] : null;
   const nextTab = tabIndex < TAB_NAMES.length - 1 ? TAB_NAMES[tabIndex + 1] : null;
@@ -316,67 +273,25 @@ export function SheetPage({ tab }: { tab: TabName }) {
     setTimeout(() => setSyncStatus('idle'), 5000);
   }, [tab]);
 
-  // Search filter
+  // Filter by search query
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return allRows;
     return allRows.filter(row =>
-      getCells(row).join(' ').toLowerCase().includes(q)
+      row.cells.map(c => cell(c)).join(' ').toLowerCase().includes(q)
     );
   }, [allRows, query]);
 
-  // Group by sections
-  const groups = useMemo(() => {
-    const source = query.trim() ? filteredRows : allRows;
-    if (query.trim()) {
-      return [{ title: `Results for "${query}"`, rows: filteredRows }];
-    }
+  const sections = useMemo(() => groupIntoSections(filteredRows), [filteredRows]);
 
-    const result: { title: string; rows: RawRow[] }[] = [];
-    let current: RawRow[] = [];
-    let currentTitle = 'Overview';
-    let firstSection = true;
+  const syncLabel = {
+    idle: 'SYNC', loading: 'SYNCING…', ok: `LIVE · ${lastSync ?? ''}`,
+    error: 'FAILED', 'no-creds': 'NO KEY',
+  }[syncStatus];
 
-    for (const row of source) {
-      const cells = getCells(row);
-      const f = filled(cells);
+  const syncClass = `btn ${syncStatus === 'ok' ? 'ok' : syncStatus === 'error' || syncStatus === 'no-creds' ? 'error' : syncStatus === 'loading' ? 'loading' : ''}`;
 
-      // Detect section boundary (single filled cell, not a rule)
-      if (f.length === 1) {
-        const s = f[0].trim();
-        if (isSectionBoundary(s)) {
-          if (current.length > 0 || !firstSection) {
-            result.push({ title: currentTitle, rows: current });
-          }
-          currentTitle = s;
-          current = [];
-          firstSection = false;
-          continue;
-        }
-      }
-      current.push(row);
-    }
-    if (current.length > 0) result.push({ title: currentTitle, rows: current });
-    return result;
-  }, [allRows, filteredRows, query]);
-
-  const syncIcons = {
-    idle: <RefreshCw size={14} />,
-    loading: <RefreshCw size={14} className="spin" />,
-    ok: <CheckCircle size={14} />,
-    error: <AlertCircle size={14} />,
-    'no-creds': <Wifi size={14} />
-  };
-  const syncLabels = {
-    idle: 'Sync Live',
-    loading: 'Syncing…',
-    ok: `Live · ${lastSync}`,
-    error: 'Sync failed',
-    'no-creds': 'No API key'
-  };
-  const syncColors: Record<string, string> = { ok: '#00ff88', error: '#ff4757', 'no-creds': '#00d4ff' };
-
-  const totalVisible = filteredRows.filter(r => filled(getCells(r)).length > 0).length;
+  const totalVisible = filteredRows.filter(r => filledCells(r).length > 0).length;
 
   return (
     <div className="main-content">
@@ -393,20 +308,15 @@ export function SheetPage({ tab }: { tab: TabName }) {
           <p className="sheet-sub">{data.headline}</p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <button
-            className={`btn ${syncStatus === 'ok' ? 'ok' : syncStatus === 'error' || syncStatus === 'no-creds' ? 'error' : syncStatus === 'loading' ? 'loading' : ''}`}
-            onClick={handleSync}
-            disabled={syncStatus === 'loading'}
-          >
-            {syncIcons[syncStatus]} {syncLabels[syncStatus]}
+          <button className={syncClass} onClick={handleSync} disabled={syncStatus === 'loading'}>
+            {syncStatus === 'loading' && <RefreshCw size={13} className="spin" />}
+            {syncStatus === 'ok' && <CheckCircle size={13} />}
+            {syncStatus === 'error' && <AlertCircle size={13} />}
+            {syncStatus === 'no-creds' && <Wifi size={13} />}
+            {syncLabel}
           </button>
-          <a
-            className="btn"
-            href={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <ExternalLink size={14} /> Sheet
+          <a className="btn" href={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`} target="_blank" rel="noreferrer">
+            <ExternalLink size={13} /> SHEET
           </a>
         </div>
       </div>
@@ -414,7 +324,7 @@ export function SheetPage({ tab }: { tab: TabName }) {
       {/* ── Stats ── */}
       <div className="stats-strip">
         {[
-          { label: 'Total rows', value: data.nonEmptyRows },
+          { label: 'Rows', value: data.nonEmptyRows },
           { label: 'Sections', value: data.metrics.sections },
           { label: 'Columns', value: data.maxCols },
           { label: 'Qty total', value: Math.round(data.metrics.quantityTotal) },
@@ -429,46 +339,37 @@ export function SheetPage({ tab }: { tab: TabName }) {
       {/* ── Search ── */}
       <div className="controls">
         <div style={{ position: 'relative', flex: 1 }}>
-          <Search size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#91a4bf' }} />
+          <Search size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             className="search-input"
-            style={{ paddingLeft: 40 }}
+            style={{ paddingLeft: 38 }}
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder={`Search in ${tab}…`}
+            placeholder={`Search ${tab}…`}
           />
         </div>
         <span className="pill">{totalVisible} rows</span>
       </div>
 
-      {/* ── Content ── */}
+      {/* ── Sections ── */}
       <div className="sheet-content">
-        {groups.length === 0 ? (
+        {sections.length === 0 ? (
           <div className="empty-state">No matching rows found.</div>
-        ) : (
-          groups.map((g, i) => (
-            <FlatSection
-              key={g.title + i}
-              title={g.title}
-              rows={g.rows}
-              color={color}
-              isScheduleTab={isScheduleTab}
-            />
-          ))
-        )}
+        ) : sections.map((section, i) => (
+          isScheduleTab
+            ? <ScheduleCard key={section.title + i} section={section} color={color} />
+            : <SectionCard key={section.title + i} section={section} color={color} />
+        ))}
       </div>
 
       {/* ── Tab nav ── */}
       <div className="tab-nav-footer">
-        {prevTab ? (
-          <Link href={`/sheet/${encodeURIComponent(prevTab)}`} className="btn secondary">
-            <ArrowLeft size={14} /> {prevTab}
-          </Link>
-        ) : <span />}
+        {prevTab
+          ? <Link href={`/sheet/${encodeURIComponent(prevTab)}`} className="btn"><ArrowLeft size={13} /> {prevTab}</Link>
+          : <span />
+        }
         {nextTab && (
-          <Link href={`/sheet/${encodeURIComponent(nextTab)}`} className="btn">
-            {nextTab} <ArrowRight size={14} />
-          </Link>
+          <Link href={`/sheet/${encodeURIComponent(nextTab)}`} className="btn">{nextTab} <ArrowRight size={13} /></Link>
         )}
       </div>
     </div>

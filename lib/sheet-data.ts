@@ -1,7 +1,6 @@
 export const SHEET_ID = "1iFUyaMhrA_HutzpgV88imc9peWfH_4ovyjLIFj33E-U";
 export const TAB_NAMES = [
   "OVERVIEW",
-  "Sheet1",
   "AUDIO",
   "LIGHTING",
   "VIDEO - LED",
@@ -122,7 +121,7 @@ export const EMBEDDED_SHEET_DATA: SheetData = {
         "cells": [
           "DASHBOARD DESIGN:",
           null,
-          "Unreal AI Studio Dubai  unreal.ae"
+          "Unreal AI Studio, Dubai "
         ]
       },
       {
@@ -684,19 +683,6 @@ export const EMBEDDED_SHEET_DATA: SheetData = {
     ],
     "metrics": {
       "sections": 12,
-      "quantityTotal": 0
-    },
-    "sections": []
-  },
-  "Sheet1": {
-    "title": "Sheet1",
-    "headline": "Sheet1",
-    "rowCount": 0,
-    "nonEmptyRows": 0,
-    "maxCols": 0,
-    "rows": [],
-    "metrics": {
-      "sections": 0,
       "quantityTotal": 0
     },
     "sections": []
@@ -3890,7 +3876,7 @@ export const EMBEDDED_SHEET_DATA: SheetData = {
   }
 };
 export const DASHBOARD_KPIS = {
-  "tabs": 12,
+  "tabs": 11,
   "departments": 10,
   "trackedItems": 419,
   "scheduleDays": 14,

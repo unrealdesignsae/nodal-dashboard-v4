@@ -4,10 +4,14 @@ const { JWT } = require('google-auth-library');
 const fs = require('fs');
 
 const SHEET_ID = "1iFUyaMhrA_HutzpgV88imc9peWfH_4ovyjLIFj33E-U";
-const TAB_NAMES = [
-  "OVERVIEW", "Sheet1", "AUDIO", "LIGHTING", "VIDEO - LED",
+let TAB_NAMES = [
+  "OVERVIEW", "AUDIO", "LIGHTING", "VIDEO - LED",
   "LASER", "SFX - PYRO", "POWER", "RIGGING", "BACKLINE", "BROADCAST", "STAGING"
 ];
+
+function sheetRange(tabName) {
+  return `'${String(tabName).replace(/'/g, "''")}'!A1:Z1000`;
+}
 
 function processTab(tabName, rawRows) {
   const rows = [];
@@ -70,13 +74,23 @@ async function main() {
   });
   const client = sheets({ version: 'v4', auth });
   
+  const meta = await client.spreadsheets.get({
+    spreadsheetId: SHEET_ID,
+    fields: 'sheets.properties.title',
+  });
+  const actualTabs = (meta.data.sheets ?? []).map(s => s.properties.title).filter(Boolean);
+  const known = new Set(TAB_NAMES);
+  const extraTabs = actualTabs.filter(t => !known.has(t));
+  TAB_NAMES = [...TAB_NAMES, ...extraTabs];
+  console.log("Tabs:", TAB_NAMES.join(", "));
+
   const embeddedData = {};
   
   for (const tab of TAB_NAMES) {
     try {
       const r = await client.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
-        range: tab + "!A1:Z300",
+        range: sheetRange(tab),
         valueRenderOption: "FORMATTED_VALUE",
       });
       const rawRows = r.data.values ?? [];
@@ -89,7 +103,7 @@ async function main() {
   }
   
   // Build DASHBOARD_ANALYTICS from the data
-  const deptTabs = ["AUDIO", "LIGHTING", "VIDEO - LED", "LASER", "SFX - PYRO", "POWER", "RIGGING", "BACKLINE", "BROADCAST", "STAGING"];
+  const deptTabs = TAB_NAMES.filter(name => !["OVERVIEW"].includes(name));
   const departmentItems = deptTabs.map(name => {
     const d = embeddedData[name];
     return { name: name.split(" - ")[0].split(" - ")[0], items: d.nonEmptyRows, quantity: d.metrics.quantityTotal };

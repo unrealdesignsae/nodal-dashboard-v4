@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Inter, Rajdhani, Share_Tech_Mono } from 'next/font/google';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { SheetStoreProvider } from '@/lib/sheet-store';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -53,7 +54,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ fontFamily: 'var(--font-body)', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden' }}>
         <ThemeProvider>
-          {children}
+          <SheetStoreProvider>
+            {children}
+          </SheetStoreProvider>
         </ThemeProvider>
       </body>
     </html>

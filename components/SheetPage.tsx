@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, ExternalLink, Search, RefreshCw, CheckCircle, AlertCircle, Wifi } from 'lucide-react';
 import { EMBEDDED_SHEET_DATA, SHEET_ID, TAB_NAMES } from '@/lib/sheet-data';
+import { useSheetData } from '@/lib/sheet-store';
 
 type TabName = keyof typeof EMBEDDED_SHEET_DATA;
 type CellVal = string | number | null;
@@ -181,12 +182,15 @@ export function SheetPage({ tab }: { tab: TabName }) {
   const [syncStatus, setSyncStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'no-creds'>('idle');
   const [lastSync, setLastSync] = useState<string | null>(null);
 
-  const data = EMBEDDED_SHEET_DATA[tab];
+  // Use live store data (persisted across reloads) — falls back to embedded snapshot
+  const storeData = useSheetData();
+  const data = storeData[tab] ?? EMBEDDED_SHEET_DATA[tab];
   const tabIndex = TAB_NAMES.indexOf(tab as any);
   const prevTab = tabIndex > 0 ? TAB_NAMES[tabIndex - 1] : null;
   const nextTab = tabIndex < TAB_NAMES.length - 1 ? TAB_NAMES[tabIndex + 1] : null;
   const discNum = DISCIPLINE_NUM(tab);
 
+  // liveRows from local per-tab sync (overrides store if more recent)
   const allRows: RawRow[] = liveRows ?? (data.rows as unknown as RawRow[]);
 
   const handleSync = useCallback(async () => {

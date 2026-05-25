@@ -1,51 +1,34 @@
 'use client';
 
-import { useState } from 'react';
 import { SHEET_ID } from '@/lib/sheet-data';
+import { useSync } from '@/lib/sheet-store';
 import { ThemeToggle } from '@/components/ThemeProvider';
 
 const SHEETS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 
-type Status = 'idle' | 'loading' | 'ok' | 'error' | 'no-creds';
-
 export function TopBar({ activeTab }: { activeTab?: string }) {
-  const [status, setStatus] = useState<Status>('idle');
-  const [lastSync, setLastSync] = useState<string | null>(null);
-
-  async function handleSync() {
-    setStatus('loading');
-    try {
-      const url = activeTab && activeTab !== 'dashboard'
-        ? `/api/sheets/${encodeURIComponent(activeTab)}`
-        : '/api/sheets/OVERVIEW';
-      const res = await fetch(url, { cache: 'no-store' });
-      const json = await res.json();
-      if (json.live === false) {
-        setStatus('no-creds');
-      } else {
-        setStatus('ok');
-        setLastSync(new Date().toLocaleTimeString());
-      }
-    } catch {
-      setStatus('error');
-    }
-    setTimeout(() => setStatus('idle'), 5000);
-  }
+  const { sync, status, lastSynced, isLive } = useSync();
 
   const dotClass =
-    status === 'ok' ? 'status-dot live' :
+    status === 'ok'                              ? 'status-dot live' :
     status === 'error' || status === 'no-creds' ? 'status-dot error' :
-    status === 'loading' ? 'status-dot' :
-    'status-dot offline';
+    status === 'loading'                         ? 'status-dot' :
+    isLive                                       ? 'status-dot live' :
+                                                   'status-dot offline';
 
   const btnLabel =
     status === 'loading'  ? 'SYNCING…' :
-    status === 'ok'       ? `SYNCED ${lastSync ?? ''}` :
+    status === 'ok'       ? `SYNCED ${lastSynced ?? ''}` :
     status === 'error'    ? 'SYNC FAILED' :
     status === 'no-creds' ? 'NO API KEY' :
+    isLive                ? `LIVE · ${lastSynced ?? ''}` :
     'SYNC';
 
-  const btnClass = `btn ${status === 'ok' ? 'ok' : status === 'error' || status === 'no-creds' ? 'error' : status === 'loading' ? 'loading' : ''}`;
+  const btnClass = `btn ${
+    status === 'ok'    ? 'ok' :
+    status === 'error' || status === 'no-creds' ? 'error' :
+    status === 'loading' ? 'loading' : ''
+  }`;
 
   return (
     <header className="topbar">
@@ -68,14 +51,29 @@ export function TopBar({ activeTab }: { activeTab?: string }) {
             / {activeTab}
           </span>
         )}
+        {isLive && status === 'idle' && lastSynced && (
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '9px',
+            color: 'var(--online)',
+            letterSpacing: '0.08em',
+            marginLeft: '10px',
+            background: 'rgba(0,255,136,0.08)',
+            border: '1px solid rgba(0,255,136,0.2)',
+            borderRadius: '4px',
+            padding: '2px 7px',
+          }}>
+            ● LIVE · {lastSynced}
+          </span>
+        )}
       </div>
 
       <div className="topbar-right">
         <button
           className={btnClass}
-          onClick={handleSync}
+          onClick={sync}
           disabled={status === 'loading'}
-          title="Pull latest data from Google Sheets"
+          title="Pull latest data from Google Sheets and cache it locally"
           style={{ fontSize: '11px', padding: '6px 14px' }}
         >
           {status === 'loading' && (

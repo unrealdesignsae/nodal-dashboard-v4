@@ -2495,3 +2495,727 @@ ul, ol { list-style: none; }
   .d2-supplier-row { grid-template-columns: 80px 1fr 20px; font-size: 11px; }
   .d2-team-phone { display: none; }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DASHBOARD V3 — BENTO REDESIGN (d3- prefix)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── PAGE SHELL ── */
+.d3-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── HERO ── */
+.d3-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 32px 36px;
+  min-height: 160px;
+}
+
+.d3-hero-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+.d3-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 100% at 75% 50%, rgba(0,212,255,0.08) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 80% at 20% 50%, rgba(168,85,247,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.d3-hero-left {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.d3-hero-right {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.d3-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.d3-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.d3-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0 0 6px;
+  line-height: 1.05;
+}
+
+.d3-hero-title-accent {
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(0,212,255,0.4);
+}
+
+.d3-hero-location {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+/* Countdown */
+.d3-countdown-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.d3-countdown {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.d3-count-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 52px;
+  background: rgba(0,212,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 4px 6px;
+}
+
+.d3-count-num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(0,212,255,0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.d3-count-label {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.d3-count-sep {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.d3-hero-date-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #00ff88;
+  background: rgba(0,255,136,0.08);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 4px;
+  padding: 3px 10px;
+}
+
+/* ── STATUS BAR ── */
+.d3-status-bar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.d3-stat-pill {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px 12px;
+  animation: fade-up 400ms ease both;
+  transition: border-color 150ms, transform 150ms;
+}
+
+.d3-stat-pill:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+.d3-stat-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.d3-stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.d3-stat-sub {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.d3-stat-glow {
+  position: absolute;
+  bottom: -20px;
+  right: -10px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  opacity: 0.08;
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+/* ── BENTO GRID ── */
+.d3-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "timeline alerts"
+    "timeline team"
+    "suppliers suppliers"
+    "depts    depts";
+  align-items: start;
+}
+
+/* ── BENTO CARD ── */
+.d3-bento {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 150ms;
+}
+
+.d3-bento:hover {
+  border-color: var(--border-hover);
+}
+
+.d3-bento-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.d3-bento-head-accent {
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.d3-bento-title {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  letter-spacing: 0.02em;
+}
+
+.d3-bento-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: rgba(0,212,255,0.04);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.d3-bento-badge-red {
+  border-color: rgba(255,71,87,0.3);
+  color: #ff4757;
+  background: rgba(255,71,87,0.06);
+}
+
+.d3-bento-body {
+  padding: 0;
+}
+
+/* ── SWIMLANE TIMELINE ── */
+.d3-swim-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.d3-swim-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--lc, var(--text-muted));
+}
+
+.d3-swim-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.d3-swim-lanes {
+  padding: 10px 0;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.d3-swim-lane {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 0 8px;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.d3-swim-lane:last-child {
+  border-bottom: none;
+}
+
+.d3-swim-lane-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  align-self: center;
+}
+
+.d3-swim-lane-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.d3-swim-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.d3-swim-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  cursor: default;
+  transition: opacity 300ms, transform 300ms;
+}
+
+.d3-swim-pill strong {
+  font-weight: 700;
+}
+
+.d3-swim-pill-sub {
+  opacity: 0.7;
+  font-size: 8px;
+}
+
+/* ── ALERT FEED ── */
+.d3-alert-feed {
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.d3-alert-section-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.d3-alert-item {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: all 280ms;
+}
+
+.d3-alert-high {
+  background: rgba(255,71,87,0.06);
+  border-color: rgba(255,71,87,0.18);
+}
+
+.d3-alert-med {
+  background: rgba(240,180,10,0.05);
+  border-color: rgba(240,180,10,0.16);
+}
+
+.d3-alert-severity-bar {
+  width: 3px;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+.d3-alert-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 10px;
+  flex: 1;
+}
+
+.d3-alert-icon-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.d3-alert-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.d3-alert-note {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── TEAM / SUPPLIERS RING CARD ── */
+.d3-team-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.d3-team-ring-stats {
+  flex: 1;
+}
+
+.d3-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 12px 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.d3-member-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transition: border-color 150ms;
+}
+
+.d3-member-row:hover {
+  border-color: var(--border-hover);
+}
+
+.d3-member-missing {
+  border-color: rgba(255,71,87,0.2) !important;
+  background: rgba(255,71,87,0.04) !important;
+}
+
+.d3-member-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.d3-member-role {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.d3-member-name {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+.d3-member-phone {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.d3-tbd-pill {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #ff4757;
+  border: 1px solid rgba(255,71,87,0.3);
+  background: rgba(255,71,87,0.06);
+  text-transform: uppercase;
+}
+
+/* ── SUPPLIERS COMPACT ── */
+.d3-sup-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 14px 10px;
+}
+
+.d3-sup-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 110px 20px;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  transition: opacity 250ms;
+}
+
+.d3-sup-row:last-child { border-bottom: none; }
+
+.d3-sup-dept {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.d3-sup-company { font-weight: 600; }
+
+.d3-sup-contact {
+  color: var(--text-secondary);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.d3-sup-status {
+  font-weight: 700;
+  font-size: 13px;
+  text-align: right;
+}
+
+/* ── DISCIPLINE TILES ── */
+.d3-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 12px;
+}
+
+.d3-tile {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 12px 12px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: border-color 180ms, transform 180ms, background 180ms;
+  cursor: pointer;
+}
+
+.d3-tile:hover {
+  border-color: var(--tc, var(--accent));
+  transform: translateY(-2px);
+  background: color-mix(in oklch, var(--tc, var(--accent)) 8%, var(--bg-secondary));
+}
+
+.d3-tile-glow {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(20px);
+  pointer-events: none;
+  transition: opacity 200ms;
+}
+
+.d3-tile:hover .d3-tile-glow {
+  opacity: 0.15;
+}
+
+.d3-tile-icon {
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.d3-tile-name {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.d3-tile-rows {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  color: var(--text-muted);
+}
+
+.d3-tile-arrow {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: auto;
+  transition: color 180ms, transform 180ms;
+}
+
+.d3-tile:hover .d3-tile-arrow {
+  color: var(--tc, var(--accent));
+  transform: translateX(2px);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .d3-status-bar { grid-template-columns: repeat(4, 1fr); }
+  .d3-tile-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .d3-hero { flex-direction: column; align-items: flex-start; }
+  .d3-hero-right { align-items: flex-start; }
+  .d3-status-bar { grid-template-columns: repeat(3, 1fr); }
+  .d3-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "timeline" "alerts" "team" "suppliers" "depts";
+  }
+  .d3-swim-lanes { max-height: 300px; }
+  .d3-tile-grid { grid-template-columns: repeat(3, 1fr); }
+  .d3-sup-row { grid-template-columns: 100px 1fr 20px; }
+  .d3-sup-contact { display: none; }
+}
+
+@media (max-width: 600px) {
+  .d3-status-bar { grid-template-columns: 1fr 1fr; }
+  .d3-tile-grid { grid-template-columns: 1fr 1fr; }
+  .d3-hero { padding: 20px; }
+  .d3-count-num { font-size: 22px; }
+  .d3-count-unit { min-width: 40px; }
+  .d3-member-phone { display: none; }
+  .d3-sup-row { grid-template-columns: 80px 1fr 20px; font-size: 10px; }
+}
+

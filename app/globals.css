@@ -2092,3 +2092,149 @@ ul, ol { list-style: none; }
   color: var(--text-muted); margin-left: auto;
   white-space: nowrap; flex-shrink: 0;
 }
+
+/* ????????????????????????????????????????????????
+   LAYOUT FIX — no gaps between dashboard columns
+????????????????????????????????????????????????? */
+
+/* Fix dashboard grid — align-items start so columns don't stretch */
+.db-grid { align-items: start; }
+
+/* Columns stack items from top, no gap at bottom */
+.db-col-left,
+.db-col-right { justify-content: start; }
+
+/* ????????????????????????????????????????????????
+   FULL MOBILE RESPONSIVE OVERHAUL
+????????????????????????????????????????????????? */
+
+/* 768px — tablet: sidebar hides, bottom nav appears */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-w: 0px;
+    --topbar-h: 52px;
+  }
+
+  /* App shell: no sidebar column, full width content */
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--topbar-h) 1fr auto;
+  }
+
+  /* Sidebar becomes bottom nav bar */
+  .sidebar {
+    grid-column: 1;
+    grid-row: 3;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    top: auto;
+    height: auto;
+    max-height: 64px;
+    overflow: visible;
+    flex-direction: row;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    padding: 0;
+    background: var(--bg-secondary);
+  }
+
+  /* Hide sidebar decorative elements */
+  .sidebar-logo,
+  .sidebar-section-label { display: none; }
+
+  /* Nav becomes horizontal scroll strip */
+  .sidebar-nav,
+  .sidebar > nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 8px;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sidebar-nav::-webkit-scrollbar,
+  .sidebar > nav::-webkit-scrollbar { display: none; }
+
+  /* Nav items become compact icon+label columns */
+  .nav-item {
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    min-width: 52px;
+    text-align: center;
+    border-radius: 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .nav-item::before { display: none; }
+  .nav-label { display: block !important; font-size: 8.5px; }
+  .nav-icon { width: 17px; height: 17px; opacity: 0.7; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  /* Google Sheets link in sidebar bottom — hide on mobile */
+  .sidebar > div:last-child { display: none; }
+
+  /* Topbar: show sidebar toggle on mobile */
+  .topbar { padding: 0 16px; }
+  .topbar-event { font-size: 12px; }
+
+  /* Main content: full width, no left offset, add bottom padding for nav bar */
+  .main-content {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 16px 16px 80px;
+  }
+
+  /* Dashboard grids: all single column on mobile */
+  .db-grid          { grid-template-columns: 1fr !important; gap: 12px; }
+  .db-kpi-row       { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .db-col-left,
+  .db-col-right     { gap: 12px; }
+
+  /* Hero compact */
+  .dash-hero        { padding: 24px 20px 20px; margin-bottom: 14px; }
+  .dash-title       { font-size: clamp(22px, 6vw, 32px); }
+  .dash-sub         { font-size: 12px; }
+
+  /* Timeline: compact */
+  .tl-item {
+    grid-template-columns: 70px 1fr;
+    grid-template-rows: auto auto;
+  }
+  .tl-tag { display: none; }
+  .tl-list { max-height: 360px; }
+
+  /* Teams/suppliers table: horizontal scroll */
+  .supplier-list,
+  .team-grid { overflow-x: auto; }
+
+  /* Dept chips: 2 col */
+  .dept-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Cards */
+  .db-card-head { padding: 12px 14px 10px; }
+}
+
+/* 480px — phone: tighten further */
+@media (max-width: 480px) {
+  .main-content  { padding: 12px 12px 76px; }
+  .db-kpi-row    { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .db-kpi        { padding: 12px 14px 10px; }
+  .db-kpi-value  { font-size: 22px !important; }
+  .dept-grid     { grid-template-columns: 1fr 1fr !important; gap: 6px; }
+  .dept-chip     { padding: 8px 10px; }
+  .dept-name     { font-size: 8.5px; }
+  .tl-item       { grid-template-columns: 60px 1fr; padding: 7px 10px; gap: 6px; }
+  .tl-date       { font-size: 9px; }
+  .tl-phase      { font-size: 11px; }
+  .tl-detail     { font-size: 10px; }
+  .alert-row     { padding: 7px 8px; }
+  .alert-label   { font-size: 11.5px; }
+  .team-row      { padding: 6px; gap: 7px; }
+  .team-row-avatar { width: 26px; height: 26px; font-size: 9px; }
+  .team-row-phone { display: none; }
+}

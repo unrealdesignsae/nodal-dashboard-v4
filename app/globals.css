@@ -4426,3 +4426,107 @@ ul, ol { list-style: none; }
   border-bottom-color: rgba(127, 13, 28, 0.35);
 }
 [data-theme="light"] .nodal-footer-link:hover { color: #7f0d1c; }
+
+/* Light mode intensity pass — brighter red + stronger text */
+[data-theme="light"] {
+  --accent: #ff1f3d;
+  --accent-dim: #d60024;
+  --accent-glow: rgba(255, 31, 61, 0.14);
+  --accent-border: rgba(255, 31, 61, 0.30);
+  --accent-hover: rgba(255, 31, 61, 0.38);
+  --border: rgba(150, 0, 24, 0.22);
+  --border-hover: rgba(255, 31, 61, 0.42);
+  --text: #050505;
+  --text-secondary: #171717;
+  --text-muted: #3d3d3d;
+}
+
+[data-theme="light"] body,
+[data-theme="light"] .main-content,
+[data-theme="light"] .dash-page,
+[data-theme="light"] .card,
+[data-theme="light"] .dash-card,
+[data-theme="light"] .mobile-menu-panel,
+[data-theme="light"] .mobile-menu-trigger {
+  color: #050505;
+  font-weight: 520;
+}
+
+[data-theme="light"] .topbar-event,
+[data-theme="light"] .nav-item,
+[data-theme="light"] .dash-card-title,
+[data-theme="light"] .dash-stat-pill-label,
+[data-theme="light"] .dash-stat-pill-value,
+[data-theme="light"] .dash-alert-text,
+[data-theme="light"] .dash-team-name,
+[data-theme="light"] .dash-supplier-company,
+[data-theme="light"] .page-title,
+[data-theme="light"] .old-section-title,
+[data-theme="light"] .mobile-menu-card span,
+[data-theme="light"] .mobile-menu-row span {
+  font-weight: 800;
+}
+
+[data-theme="light"] .dash-meta-item,
+[data-theme="light"] .dash-alert-note,
+[data-theme="light"] .dash-team-role,
+[data-theme="light"] .dash-supplier-dept,
+[data-theme="light"] .mobile-menu-card em,
+[data-theme="light"] .mobile-menu-row em,
+[data-theme="light"] .tbl td,
+[data-theme="light"] .info-value {
+  font-weight: 600;
+}
+
+[data-theme="light"] .sidebar-logo-text {
+  background: linear-gradient(90deg, #68000f 0%, #ff1f3d 62%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .sidebar-logo,
+[data-theme="light"] .dash-hero {
+  background: linear-gradient(180deg, rgba(255, 31, 61, 0.13) 0%, transparent 62%);
+}
+
+[data-theme="light"] .sidebar-logo::after,
+[data-theme="light"] .dash-hero-accent {
+  background: linear-gradient(90deg, rgba(255, 31, 61, 0.75), rgba(214, 0, 36, 0.22), transparent);
+}
+
+[data-theme="light"] .nav-item:hover,
+[data-theme="light"] .nav-item.active,
+[data-theme="light"] .mobile-menu-card.active,
+[data-theme="light"] .mobile-menu-row.active {
+  color: #d60024;
+  background: rgba(255, 31, 61, 0.13);
+}
+
+[data-theme="light"] .nodal-footer {
+  background: linear-gradient(180deg, #ff1f3d 0%, #d60024 100%);
+  border-top-color: rgba(0, 0, 0, 0.28);
+  color: #000;
+}
+[data-theme="light"] .nodal-footer-company,
+[data-theme="light"] .nodal-footer-sub,
+[data-theme="light"] .nodal-footer-tagline,
+[data-theme="light"] .nodal-footer-link,
+[data-theme="light"] .nodal-footer-col-label,
+[data-theme="light"] .nodal-footer-brief-badge,
+[data-theme="light"] .nodal-footer-cta-link,
+[data-theme="light"] .nodal-footer-meta {
+  color: #000 !important;
+  font-weight: 800;
+}
+[data-theme="light"] .nodal-footer-link svg {
+  stroke: #000;
+  opacity: 0.9;
+}
+[data-theme="light"] .nodal-footer-brief-badge {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.24);
+}
+[data-theme="light"] .nodal-footer-cta-link {
+  border-bottom-color: rgba(0, 0, 0, 0.38);
+}

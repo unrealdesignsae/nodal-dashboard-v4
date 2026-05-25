@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { SheetPage } from '@/components/SheetPage';
 import { TopBar } from '@/components/TopBar';
+import { MobileMenu } from '@/components/MobileMenu';
 import { EMBEDDED_SHEET_DATA, TAB_NAMES } from '@/lib/sheet-data';
 
 type Params = { tab: string };
@@ -18,6 +19,7 @@ export default function Page({ params }: { params: Params }) {
     <div className="app-shell">
       <TopBar activeTab={decoded} />
       <Sidebar active={decoded} />
+      <MobileMenu active={decoded} />
       <SheetPage tab={decoded} />
     </div>
   );

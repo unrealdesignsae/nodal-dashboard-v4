@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Inter, Rajdhani, Share_Tech_Mono } from 'next/font/google';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -40,15 +41,18 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${rajdhani.variable} ${shareTechMono.variable}`}>
-      <body
-        style={{
-          fontFamily: 'var(--font-body)',
-          background: '#070a0f',
-          color: '#e8f0fe',
-          overflowX: 'hidden',
-        }}
-      >
-        {children}
+      {/* No-flash: read localStorage before first paint */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('ntc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else{var d=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',d);}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body style={{ fontFamily: 'var(--font-body)', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden' }}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

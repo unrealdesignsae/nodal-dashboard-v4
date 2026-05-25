@@ -3,8 +3,9 @@
    Control Room Aesthetic · Electric Cyan · Dark Engineering
 ═══════════════════════════════════════════════════ */
 
-/* ─── TOKENS ─── */
-:root {
+/* ─── TOKENS — DARK (default) ─── */
+:root,
+[data-theme="dark"] {
   --bg:            #070a0f;
   --bg-secondary:  #0d1117;
   --bg-card:       #0f1520;
@@ -36,6 +37,89 @@
   --font-body:     'Inter', sans-serif;
   --font-mono:     'Share Tech Mono', monospace;
 }
+
+/* ─── TOKENS — LIGHT ─── */
+[data-theme="light"] {
+  --bg:            #f4f6fb;
+  --bg-secondary:  #eaecf4;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f0f4ff;
+  --bg-muted:      #e8ecf8;
+
+  --accent:        #0099cc;
+  --accent-dim:    #007aab;
+  --accent-glow:   rgba(0, 153, 204, 0.12);
+  --accent-border: rgba(0, 153, 204, 0.18);
+  --accent-hover:  rgba(0, 153, 204, 0.25);
+
+  --text:          #0f1825;
+  --text-secondary:#4a5578;
+  --text-muted:    #8892a8;
+
+  --online:        #00b860;
+  --online-glow:   rgba(0, 184, 96, 0.12);
+  --error:         #e02d3c;
+
+  --border:        rgba(0, 153, 204, 0.15);
+  --border-hover:  rgba(0, 153, 204, 0.35);
+}
+
+/* ─── LIGHT OVERRIDES for hard-coded dark hex values ─── */
+[data-theme="light"] .card,
+[data-theme="light"] .old-stat,
+[data-theme="light"] .flat-section,
+[data-theme="light"] .section-card {
+  background: #ffffff;
+  border-color: rgba(0, 153, 204, 0.15);
+}
+[data-theme="light"] .tbl-wrap {
+  background: #ffffff;
+  border-color: rgba(0, 153, 204, 0.15);
+}
+[data-theme="light"] .tbl th {
+  background: rgba(0, 153, 204, 0.04);
+  border-bottom-color: rgba(0, 153, 204, 0.12);
+  color: #4a5578;
+}
+[data-theme="light"] .tbl td {
+  border-bottom-color: rgba(0, 153, 204, 0.07);
+  color: #0f1825;
+}
+[data-theme="light"] .tbl td.dim { color: #4a5578; }
+[data-theme="light"] .tbl tbody tr:hover td { background: rgba(0, 153, 204, 0.04); }
+[data-theme="light"] .kv { background: #eaecf4; border-color: rgba(0, 153, 204, 0.15); }
+[data-theme="light"] .kv-value { color: #0f1825; }
+[data-theme="light"] .old-section-title { color: #0f1825; }
+[data-theme="light"] body { background: #f4f6fb; }
+
+/* ─── THEME TRANSITION ─── */
+body, .sidebar, .topbar, .card, .old-stat, .tbl, .tbl-wrap, .kv, .main-content {
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease;
+}
+
+/* ─── THEME TOGGLE BUTTON ─── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+  white-space: nowrap;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+.theme-toggle svg { flex-shrink: 0; }
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

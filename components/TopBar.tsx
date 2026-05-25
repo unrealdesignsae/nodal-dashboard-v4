@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { SHEET_ID } from '@/lib/sheet-data';
+import { ThemeToggle } from '@/components/ThemeProvider';
 
 const SHEETS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 
@@ -98,6 +99,7 @@ export function TopBar({ activeTab }: { activeTab?: string }) {
             <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
           </svg>
         </a>
+        <ThemeToggle />
       </div>
     </header>
   );

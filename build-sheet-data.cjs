@@ -128,7 +128,7 @@ export const DASHBOARD_KPIS = ${JSON.stringify(DASHBOARD_KPIS, null, 2)};
 export const DASHBOARD_ANALYTICS = ${JSON.stringify(DASHBOARD_ANALYTICS, null, 2)};
 `;
   
-  fs.writeFileSync('/root/nodal-dashboard/lib/sheet-data.ts', ts);
+  fs.writeFileSync('/root/nodal-dashboard-v4/lib/sheet-data.ts', ts);
   console.log("Written sheet-data.ts (" + ts.length + " bytes)");
   
   // Summary

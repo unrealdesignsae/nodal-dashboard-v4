@@ -317,6 +317,87 @@ function SuppliersCard({ list }: { list: ReturnType<typeof getSuppliers> }) {
 
 /* ─────────────────────────────────────────────
    MAIN DASHBOARD
+/* ─────────────────────────────────────────────
+   HORIZONTAL TIMELINE
+───────────────────────────────────────────── */
+function HorizontalTimeline({ schedule }: { schedule: ReturnType<typeof getSchedule> }) {
+  const { ref, vis } = useInView();
+  const phases = [
+    { key: 'travel', label: 'TRAVEL',     dates: '3 Jul',             days: 1,  icon: '✈' },
+    { key: 'build',  label: 'BUILD',      dates: '3 – 14 Jul',       days: 12, icon: '🔧' },
+    { key: 'prep',   label: 'PREP / D-0', dates: '15 – 16 Jul',      days: 2,  icon: '⚡' },
+    { key: 'show',   label: 'SHOW DAYS',  dates: '17 – 19 Jul',      days: 3,  icon: '🎵' },
+    { key: 'steel',  label: 'LOAD OUT',   dates: '20 – 26 Jul',      days: 7,  icon: '📦' },
+  ];
+  const totalDays = phases.reduce((s, p) => s + p.days, 0);
+  // Current progress — days since 3 Jul 2026
+  const now = new Date();
+  const start = new Date('2026-07-03');
+  const elapsed = Math.max(0, Math.floor((now.getTime() - start.getTime()) / 86400000));
+  const progress = Math.min(100, (elapsed / totalDays) * 100);
+
+  return (
+    <div ref={ref} className="htl-card">
+      <div className="htl-header">
+        <div className="htl-header-left">
+          <div className="dash-card-accent-bar" />
+          <span className="dash-card-title">PRODUCTION TIMELINE</span>
+        </div>
+        <div className="dash-card-badge">25 DAYS TOTAL</div>
+      </div>
+      <div className="htl-body">
+        {/* Track */}
+        <div className="htl-track">
+          {/* Progress bar */}
+          <div className="htl-progress" style={{
+            width: vis ? `${progress}%` : '0%',
+            transition: 'width 1.5s cubic-bezier(0.22,1,0.36,1)',
+          }} />
+          {/* Phase segments */}
+          <div className="htl-segments">
+            {phases.map((p, i) => {
+              const widthPct = (p.days / totalDays) * 100;
+              return (
+                <div key={p.key} className={`htl-segment ${p.key}`} style={{
+                  width: `${widthPct}%`,
+                  opacity: vis ? 1 : 0,
+                  transform: vis ? 'scaleX(1)' : 'scaleX(0)',
+                  transition: `opacity 0.5s ease ${i * 120}ms, transform 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 120}ms`,
+                  transformOrigin: 'left center',
+                }}>
+                  <div className="htl-seg-inner">
+                    <span className="htl-seg-icon">{p.icon}</span>
+                    <span className="htl-seg-label">{p.label}</span>
+                    <span className="htl-seg-days">{p.days}d</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {/* Date markers */}
+        <div className="htl-dates">
+          {phases.map((p, i) => {
+            const leftPct = phases.slice(0, i).reduce((s, pp) => s + pp.days, 0) / totalDays * 100;
+            return (
+              <div key={p.key} className="htl-date-mark" style={{ left: `${leftPct}%` }}>
+                <div className="htl-date-dot" />
+                <span>{p.dates}</span>
+              </div>
+            );
+          })}
+          <div className="htl-date-mark" style={{ left: '100%' }}>
+            <div className="htl-date-dot" />
+            <span>26 Jul</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   MAIN DASHBOARD
 ───────────────────────────────────────────── */
 export function Dashboard() {
   const sheetData = useSheetData();
@@ -354,22 +435,12 @@ export function Dashboard() {
         ═══════════════════════════════════════ */}
         <div className="dash-hero">
           <div className="dash-hero-accent" />
-
-          {/* Eyebrow */}
           <div className="dash-eyebrow">
             <div className="dash-eyebrow-dot" />
             <span>MAINSTAGE ADVANCING · NODAL TECHNICAL CONSULTANCY</span>
           </div>
-
-          {/* LOGO + COUNTDOWN row */}
           <div className="dash-hero-row">
-            <img
-              src="/ec-logo.png"
-              alt="Electric Castle 16-19 July 2026"
-              className="dash-ec-logo"
-            />
-
-            {/* Countdown */}
+            <img src="/ec-logo.png" alt="Electric Castle 16-19 July 2026" className="dash-ec-logo" />
             <div className="dash-countdown">
               <div className="dash-countdown-label">SHOWTIME COUNTDOWN</div>
               <div className="dash-countdown-digits">
@@ -384,8 +455,6 @@ export function Dashboard() {
               <div className="dash-countdown-badge">17 – 19 July 2026 · Show Days</div>
             </div>
           </div>
-
-          {/* Location meta row */}
           <div className="dash-meta-row">
             <div className="dash-meta-item">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -397,6 +466,11 @@ export function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* ═══════════════════════════════════════
+            HORIZONTAL TIMELINE — FULL WIDTH
+        ═══════════════════════════════════════ */}
+        <HorizontalTimeline schedule={schedule} />
 
         {/* ═══════════════════════════════════════
             PAGE BODY
@@ -415,3 +489,4 @@ export function Dashboard() {
     </>
   );
 }
+

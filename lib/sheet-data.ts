@@ -122,7 +122,7 @@ export const EMBEDDED_SHEET_DATA: SheetData = {
         "cells": [
           "DASHBOARD DESIGN:",
           null,
-          "Unreal AI Studio  unreal.ae"
+          "Unreal AI Studio Dubai  unreal.ae"
         ]
       },
       {

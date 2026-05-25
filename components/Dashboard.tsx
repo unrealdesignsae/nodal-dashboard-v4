@@ -422,15 +422,10 @@ export function Dashboard() {
               src="/ec-logo.png"
               alt="Electric Castle 16-19 July 2026"
               style={{
-                flex: 1,
-                minWidth: 0,
-                width: '100%',
-                maxWidth: 700,
-                height: 'clamp(90px, 12vw, 160px)',
-                objectFit: 'contain',
-                objectPosition: 'left center',
+                width: 'clamp(280px, 45vw, 620px)',
+                height: 'auto',
                 display: 'block',
-                filter: 'drop-shadow(0 6px 36px rgba(255,20,20,0.55))',
+                filter: 'drop-shadow(0 4px 32px rgba(255,20,20,0.6))',
               }}
             />
 

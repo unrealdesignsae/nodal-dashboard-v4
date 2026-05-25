@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { EMBEDDED_SHEET_DATA, SHEET_ID } from '@/lib/sheet-data';
+import { EMBEDDED_SHEET_DATA, SHEET_ID, TAB_NAMES } from '@/lib/sheet-data';
 import { readSheetRange } from '@/lib/google-sheets';
 
 export const dynamic = 'force-dynamic';
 
-type TabName = keyof typeof EMBEDDED_SHEET_DATA;
+type TabName = typeof TAB_NAMES[number];
 
 export async function GET(_request: Request, { params }: { params: { tab: string } }) {
   const tab = decodeURIComponent(params.tab) as TabName;
-  if (!(tab in EMBEDDED_SHEET_DATA)) {
+  if (!TAB_NAMES.includes(tab)) {
     return NextResponse.json({ error: 'Unknown tab' }, { status: 404 });
   }
 

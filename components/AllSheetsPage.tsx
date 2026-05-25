@@ -135,12 +135,12 @@ function DisciplineSection({ tab, query }: { tab: TabName; query: string }) {
       <div className="old-section-head">
         <div>
           <div className="old-section-eyebrow">DISCIPLINE · {discNum}</div>
-          <h2 className="old-section-title">{tab === 'Sheet1' ? 'SCHEDULE' : tab}</h2>
+          <h2 className="old-section-title">{String(tab) === 'Sheet1' ? 'SCHEDULE' : tab}</h2>
           <p className="old-section-subtitle">{data.headline}</p>
         </div>
         <div className="old-section-marker">
           <span className="old-section-marker-num">{discNum}</span>
-          {(tab === 'Sheet1' ? 'SCHEDULE' : tab).toUpperCase()}
+          {(String(tab) === 'Sheet1' ? 'SCHEDULE' : tab).toUpperCase()}
         </div>
       </div>
 
@@ -189,8 +189,7 @@ function DisciplineSection({ tab, query }: { tab: TabName; query: string }) {
 
 export function AllSheetsPage() {
   const [query, setQuery] = useState('');
-  const tabs = TAB_NAMES.filter(t => t !== 'OVERVIEW' && t !== 'Sheet1').concat(['Sheet1'] as any);
-  const allTabs: TabName[] = ['OVERVIEW', ...tabs] as TabName[];
+  const allTabs: TabName[] = TAB_NAMES as readonly TabName[] as TabName[];
 
   return (
     <div className="main-content">
@@ -216,7 +215,7 @@ export function AllSheetsPage() {
               className="btn"
               style={{ fontSize: '10px', padding: '4px 10px' }}
             >
-              {tab === 'Sheet1' ? 'SCHEDULE' : tab}
+              {String(tab) === 'Sheet1' ? 'SCHEDULE' : tab}
             </a>
           ))}
         </div>

@@ -64,7 +64,8 @@ const PHASE: Record<string, { color: string; bg: string; label: string }> = {
 
 function getSchedule(sd: SheetData) {
   const out: { date: string; tag: string; detail: string; type: string }[] = [];
-  for (const r of sd['Sheet1'].rows) {
+  const scheduleRows = ('Sheet1' in sd ? sd['Sheet1' as keyof SheetData]?.rows : undefined) ?? sd.OVERVIEW.rows;
+  for (const r of scheduleRows) {
     const date = s(r.cells?.[0]); const tag = s(r.cells?.[1]);
     const phaseRaw = s(r.cells?.[2]); const detail = s(r.cells?.[3]);
     if (!date || !/\d+\/Jul/i.test(date)) continue;

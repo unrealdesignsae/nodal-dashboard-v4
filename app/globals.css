@@ -4530,3 +4530,54 @@ ul, ol { list-style: none; }
 [data-theme="light"] .nodal-footer-cta-link {
   border-bottom-color: rgba(0, 0, 0, 0.38);
 }
+
+/* Light mode mobile menu — red surface, black text */
+@media (max-width: 760px) {
+  [data-theme="light"] .mobile-menu-trigger,
+  [data-theme="light"] .mobile-menu-panel {
+    background: linear-gradient(180deg, #ff1f3d 0%, #d60024 100%);
+    border-color: rgba(0, 0, 0, 0.28);
+    color: #000;
+    box-shadow: 0 14px 48px rgba(0,0,0,0.32), 0 0 24px rgba(255,31,61,0.25);
+  }
+
+  [data-theme="light"] .mobile-menu-trigger-icon,
+  [data-theme="light"] .mobile-menu-close {
+    background: #000;
+    border-color: rgba(0,0,0,0.35);
+    color: #ff1f3d;
+  }
+
+  [data-theme="light"] .mobile-menu-trigger-text strong,
+  [data-theme="light"] .mobile-menu-trigger-text em,
+  [data-theme="light"] .mobile-menu-kicker,
+  [data-theme="light"] .mobile-menu-title,
+  [data-theme="light"] .mobile-menu-label,
+  [data-theme="light"] .mobile-menu-card span,
+  [data-theme="light"] .mobile-menu-card em,
+  [data-theme="light"] .mobile-menu-row span,
+  [data-theme="light"] .mobile-menu-row em,
+  [data-theme="light"] .mobile-menu-sheet-link {
+    color: #000;
+    font-weight: 850;
+  }
+
+  [data-theme="light"] .mobile-menu-head {
+    border-bottom-color: rgba(0, 0, 0, 0.22);
+  }
+
+  [data-theme="light"] .mobile-menu-card,
+  [data-theme="light"] .mobile-menu-row,
+  [data-theme="light"] .mobile-menu-sheet-link {
+    background: rgba(255, 255, 255, 0.20);
+    border-color: rgba(0, 0, 0, 0.24);
+    color: #000;
+  }
+
+  [data-theme="light"] .mobile-menu-card.active,
+  [data-theme="light"] .mobile-menu-row.active {
+    background: rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.55);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
+  }
+}

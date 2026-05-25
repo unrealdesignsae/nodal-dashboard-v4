@@ -4,419 +4,313 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { EMBEDDED_SHEET_DATA, TAB_NAMES } from '@/lib/sheet-data';
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   DATA LAYER — extract real info from sheets
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-function s(v: unknown): string {
-  return v === null || v === undefined ? '' : String(v).trim();
-}
-function isTBD(v: string) {
-  return !v || /^tbd$/i.test(v.trim());
-}
+function s(v: unknown): string { return v == null ? '' : String(v).trim(); }
 
-// ── Production team from OVERVIEW §3 ──
 function getTeam() {
   const rows = EMBEDDED_SHEET_DATA.OVERVIEW.rows;
-  const team: { role: string; firstName: string; lastName: string; phone: string; email: string }[] = [];
-  let inTeam = false;
+  const out: { role: string; name: string; phone: string; email: string }[] = [];
+  let in3 = false;
   for (const r of rows) {
     const c0 = s(r.cells?.[0]).replace(':', '');
-    if (c0.includes('3. PRODUCTION TEAM')) { inTeam = true; continue; }
+    if (c0.includes('3. PRODUCTION TEAM')) { in3 = true; continue; }
     if (c0.includes('4.')) break;
-    if (!inTeam || !c0 || c0 === 'Role') continue;
-    team.push({
-      role: c0,
-      firstName: s(r.cells?.[2]),
-      lastName:  s(r.cells?.[4]),
-      phone:     s(r.cells?.[6]),
-      email:     s(r.cells?.[8]),
-    });
+    if (!in3 || !c0 || c0 === 'Role') continue;
+    const name = [s(r.cells?.[2]), s(r.cells?.[4])].filter(Boolean).join(' ');
+    out.push({ role: c0, name, phone: s(r.cells?.[6]), email: s(r.cells?.[8]) });
   }
-  return team;
+  return out;
 }
 
-// ── Suppliers from OVERVIEW §4 ──
 function getSuppliers() {
   const rows = EMBEDDED_SHEET_DATA.OVERVIEW.rows;
-  const list: { dept: string; company: string; contact: string; phone: string; email: string }[] = [];
-  let inSupp = false;
+  const out: { dept: string; company: string; contact: string }[] = [];
+  let in4 = false;
   for (const r of rows) {
     const c0 = s(r.cells?.[0]);
-    if (c0.includes('4. SUPPLIERS')) { inSupp = true; continue; }
+    if (c0.includes('4. SUPPLIERS')) { in4 = true; continue; }
     if (c0.includes('5.') || c0.includes('TABLE')) break;
-    if (!inSupp || !c0 || c0 === 'Discipline') continue;
-    list.push({
-      dept:    c0,
-      company: s(r.cells?.[2]),
-      contact: s(r.cells?.[4]),
-      phone:   s(r.cells?.[6]),
-      email:   s(r.cells?.[8]),
-    });
+    if (!in4 || !c0 || c0 === 'Discipline') continue;
+    out.push({ dept: c0, company: s(r.cells?.[2]), contact: s(r.cells?.[4]) });
   }
-  return list;
+  return out;
 }
 
-// ── Schedule timeline from Sheet1 ──
-const PHASE_TYPE = {
-  show:   { color: '#00ff88', bg: 'rgba(0,255,136,0.08)', label: 'SHOW DAY' },
-  build:  { color: '#00d4ff', bg: 'rgba(0,212,255,0.07)', label: 'BUILD' },
-  prep:   { color: '#a855f7', bg: 'rgba(168,85,247,0.07)', label: 'PREP' },
-  steel:  { color: '#f0b40a', bg: 'rgba(240,180,10,0.07)', label: 'LOAD OUT' },
-  travel: { color: '#8892a4', bg: 'rgba(136,146,164,0.06)', label: 'TRAVEL' },
-} as const;
-type PhaseType = keyof typeof PHASE_TYPE;
+const PHASE: Record<string, { color: string; bg: string; label: string }> = {
+  show:   { color: '#00ff88', bg: 'rgba(0,255,136,0.07)', label: 'SHOW' },
+  build:  { color: '#00d4ff', bg: 'rgba(0,212,255,0.06)', label: 'BUILD' },
+  prep:   { color: '#a855f7', bg: 'rgba(168,85,247,0.06)', label: 'PREP' },
+  steel:  { color: '#f0b40a', bg: 'rgba(240,180,10,0.06)', label: 'OUT' },
+  travel: { color: '#667085', bg: 'rgba(102,112,133,0.05)', label: 'TRAVEL' },
+};
 
 function getSchedule() {
   const rows = EMBEDDED_SHEET_DATA['Sheet1'].rows;
-  const events: { date: string; dayTag: string; phase: string; detail: string; type: PhaseType }[] = [];
+  const out: { date: string; tag: string; phase: string; detail: string; type: string }[] = [];
   for (const r of rows) {
-    const date   = s(r.cells?.[0]);
-    const dayTag = s(r.cells?.[1]);
-    const phase  = s(r.cells?.[2]);
-    const detail = s(r.cells?.[3]);
+    const date = s(r.cells?.[0]); const tag = s(r.cells?.[1]);
+    const phase = s(r.cells?.[2]); const detail = s(r.cells?.[3]);
     if (!date || !/\d+\/Jul/i.test(date)) continue;
-    const p = (phase + dayTag).toLowerCase();
-    let type: PhaseType =
-      p.includes('show') || /day [123]/.test(p) ? 'show' :
-      p.includes('steel') || p.includes('load out') || p.includes('loadings') ? 'steel' :
-      p.includes('travel') ? 'travel' :
-      p.includes('probe') || p.includes('program') || p.includes('day 0') ? 'prep' :
-      'build';
-    events.push({ date, dayTag, phase, detail, type });
+    const p = (phase + tag).toLowerCase();
+    const type = p.includes('show') || /day [123]/.test(p) ? 'show'
+      : p.includes('steel') || p.includes('load out') || p.includes('loadings') ? 'steel'
+      : p.includes('travel') ? 'travel'
+      : p.includes('probe') || p.includes('program') || p.includes('day 0') ? 'prep'
+      : 'build';
+    out.push({ date, tag, phase, detail, type });
   }
-  return events;
+  return out;
 }
 
-// ── Critical alerts: TBD items that MATTER ──
-function getAlerts() {
-  const team = getTeam();
-  const suppliers = getSuppliers();
-  const alerts: { level: 'high' | 'med'; label: string; detail: string }[] = [];
-
-  // Missing crew (high priority roles)
+function getAlerts(team: ReturnType<typeof getTeam>, suppliers: ReturnType<typeof getSuppliers>) {
+  const out: { level: 'high' | 'med'; text: string; note: string }[] = [];
   const keyRoles = ['Technical Manager', 'Power Crew Chief', 'Laser Operator', 'Stagehand Coordinator', 'Backline Responsible'];
-  team.filter(t => keyRoles.includes(t.role) && !t.firstName).forEach(t => {
-    alerts.push({ level: 'high', label: `${t.role} — Unassigned`, detail: 'No crew member assigned to this role' });
-  });
-
-  // Missing suppliers
-  suppliers.filter(s => !s.company).forEach(s => {
-    alerts.push({ level: 'high', label: `${s.dept} supplier TBD`, detail: 'No company contracted yet' });
-  });
-
-  // Show dates
-  alerts.push({ level: 'med', label: 'Show dates not confirmed', detail: 'Build start, show days & load out still TBD July 2026' });
-  alerts.push({ level: 'med', label: 'Emergency number TBD', detail: 'Site emergency contact not yet assigned' });
-  alerts.push({ level: 'med', label: 'Nearest hospital TBD', detail: 'Medical facility for Bonțida area not confirmed' });
-  alerts.push({ level: 'med', label: 'Curfew / Last Act TBD', detail: 'Show end time not confirmed' });
-
-  return alerts;
+  team.filter(t => keyRoles.includes(t.role) && !t.name)
+    .forEach(t => out.push({ level: 'high', text: `${t.role}`, note: 'No crew assigned' }));
+  suppliers.filter(s => !s.company)
+    .forEach(s => out.push({ level: 'high', text: `${s.dept} supplier`, note: 'No company contracted' }));
+  out.push({ level: 'med', text: 'Show dates TBD', note: 'Build + show days not confirmed' });
+  out.push({ level: 'med', text: 'Emergency contact TBD', note: 'Site emergency number missing' });
+  out.push({ level: 'med', text: 'Curfew / Last Act TBD', note: 'Show end time not set' });
+  return out;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SECTION WRAPPER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function Section({ title, badge, badgeRed, accent = '#00d4ff', children }: {
-  title: string; badge?: string; badgeRed?: boolean; accent?: string; children: React.ReactNode;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   COMPONENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+function useVisible(threshold = 0.05) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, vis };
+}
+
+/* Card shell */
+function Card({ title, badge, accent = '#00d4ff', badgeRed, children, style }: {
+  title: string; badge?: string; accent?: string; badgeRed?: boolean;
+  children: React.ReactNode; style?: React.CSSProperties;
 }) {
   return (
-    <div className="db-card">
-      <div className="db-card-head">
-        <div className="db-card-title">
-          <span className="db-title-dot" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
-          {title}
-        </div>
-        {badge && (
-          <span className={`db-badge${badgeRed ? ' db-badge-red' : ''}`}>{badge}</span>
-        )}
+    <div className="d2-card" style={style}>
+      <div className="d2-card-head" style={{ borderLeftColor: accent }}>
+        <span className="d2-card-title">{title}</span>
+        {badge && <span className={`d2-badge${badgeRed ? ' d2-badge-red' : ''}`}>{badge}</span>}
       </div>
-      {children}
+      <div className="d2-card-body">{children}</div>
     </div>
   );
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TIMELINE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Timeline ── */
 function Timeline() {
+  const { ref, vis } = useVisible();
   const events = getSchedule();
-  const [vis, setVis] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold: 0.05 });
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-
   return (
-    <Section title="Production Schedule" badge="3 Jul – 26 Jul 2026" accent="#00d4ff">
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', padding: '10px 18px 6px', borderBottom: '1px solid var(--border)' }}>
-        {(Object.entries(PHASE_TYPE) as [PhaseType, typeof PHASE_TYPE[PhaseType]][]).map(([k, v]) => (
-          <span key={k} style={{ display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: v.color, display: 'inline-block' }} />
+    <Card title="Production Schedule" badge="3 Jul — 26 Jul 2026" accent="#00d4ff" style={{ gridArea: 'timeline' }}>
+      <div className="d2-legend">
+        {Object.entries(PHASE).map(([k, v]) => (
+          <span key={k} className="d2-legend-item">
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: v.color, display: 'inline-block', flexShrink: 0 }} />
             {v.label}
           </span>
         ))}
       </div>
-
-      <div ref={ref} className="tl-list" style={{ padding: '8px 0 4px', maxHeight: 480 }}>
+      <div ref={ref} className="d2-tl">
         {events.map((ev, i) => {
-          const cfg = PHASE_TYPE[ev.type];
+          const p = PHASE[ev.type];
           return (
-            <div key={i} className="tl-item" style={{
-              borderLeftColor: cfg.color,
-              background: cfg.bg,
-              opacity: vis ? 1 : 0,
-              transform: vis ? 'none' : 'translateX(-12px)',
-              transition: `opacity 300ms ease ${i * 25}ms, transform 300ms ease ${i * 25}ms`,
+            <div key={i} className="d2-tl-row" style={{
+              borderLeftColor: p.color, background: p.bg,
+              opacity: vis ? 1 : 0, transform: vis ? 'none' : 'translateX(-10px)',
+              transition: `opacity 280ms ${i * 22}ms, transform 280ms ${i * 22}ms`,
             }}>
-              <div className="tl-date">{ev.dayTag ? <><strong style={{ color: cfg.color }}>{ev.dayTag}</strong> · {ev.date}</> : ev.date}</div>
-              <div className="tl-phase" style={{ color: cfg.color }}>{ev.phase}</div>
-              {ev.detail && <div className="tl-detail">{ev.detail}</div>}
-              <span className="tl-tag" style={{ color: cfg.color, borderColor: cfg.color + '35', background: cfg.bg }}>{cfg.label}</span>
+              <div className="d2-tl-date">
+                {ev.tag ? <strong style={{ color: p.color }}>{ev.tag}</strong> : null}
+                <span>{ev.tag ? ` · ${ev.date}` : ev.date}</span>
+              </div>
+              <div className="d2-tl-phase" style={{ color: p.color }}>{ev.phase}</div>
+              {ev.detail && <div className="d2-tl-detail">{ev.detail}</div>}
             </div>
           );
         })}
       </div>
-    </Section>
+    </Card>
   );
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CRITICAL ALERTS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function Alerts() {
-  const alerts = getAlerts();
-  const high = alerts.filter(a => a.level === 'high');
-  const med  = alerts.filter(a => a.level === 'med');
-
+/* ── Alerts ── */
+function Alerts({ items }: { items: ReturnType<typeof getAlerts> }) {
+  const high = items.filter(a => a.level === 'high');
+  const med  = items.filter(a => a.level === 'med');
   return (
-    <Section title="Action Required" badge={`${alerts.length} open`} badgeRed accent="#ff4757">
-      <div style={{ padding: '12px 18px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {high.length > 0 && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', color: '#ff4757', marginBottom: 4 }}>
-            ● HIGH PRIORITY
-          </div>
-        )}
-        {high.map((a, i) => (
-          <div key={i} className="alert-row alert-high">
-            <span className="alert-icon">✗</span>
-            <div>
-              <div className="alert-label">{a.label}</div>
-              <div className="alert-detail">{a.detail}</div>
+    <Card title="Action Required" badge={`${items.length} open`} badgeRed accent="#ff4757" style={{ gridArea: 'alerts' }}>
+      {high.length > 0 && <div className="d2-alert-group-label" style={{ color: '#ff4757' }}>● HIGH PRIORITY</div>}
+      {high.map((a, i) => (
+        <div key={i} className="d2-alert d2-alert-high">
+          <span className="d2-alert-icon" style={{ color: '#ff4757' }}>✗</span>
+          <div><div className="d2-alert-text">{a.text}</div><div className="d2-alert-note">{a.note}</div></div>
+        </div>
+      ))}
+      {med.length > 0 && <div className="d2-alert-group-label" style={{ color: '#f0b40a', marginTop: 10 }}>● PENDING</div>}
+      {med.map((a, i) => (
+        <div key={i} className="d2-alert d2-alert-med">
+          <span className="d2-alert-icon" style={{ color: '#f0b40a' }}>⚠</span>
+          <div><div className="d2-alert-text">{a.text}</div><div className="d2-alert-note">{a.note}</div></div>
+        </div>
+      ))}
+    </Card>
+  );
+}
+
+/* ── Team ── */
+function Team({ members }: { members: ReturnType<typeof getTeam> }) {
+  const ok = members.filter(m => m.name).length;
+  return (
+    <Card title="Production Team" badge={`${ok} / ${members.length} assigned`}
+      badgeRed={ok < members.length} accent="#a855f7" style={{ gridArea: 'team' }}>
+      <div className="d2-team-list">
+        {members.map((m, i) => (
+          <div key={i} className={`d2-team-row${m.name ? '' : ' d2-team-missing'}`}>
+            <div className="d2-team-avatar" style={{
+              background: m.name ? 'linear-gradient(135deg,#a855f7,#6d28d9)' : 'transparent',
+              border: m.name ? 'none' : '1px dashed rgba(255,71,87,0.4)',
+              color: m.name ? '#fff' : '#ff4757',
+            }}>
+              {m.name ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?'}
             </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="d2-team-role">{m.role}</div>
+              <div className="d2-team-name" style={{ color: m.name ? 'var(--text)' : '#ff4757' }}>
+                {m.name || 'TBD — Unassigned'}
+              </div>
+            </div>
+            {m.phone && m.name && <div className="d2-team-phone">{m.phone}</div>}
+            {!m.name && <span className="d2-tbd-chip">TBD</span>}
           </div>
         ))}
-        {med.length > 0 && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', color: '#f0b40a', marginTop: 6, marginBottom: 4 }}>
-            ● PENDING
-          </div>
-        )}
-        {med.map((a, i) => (
-          <div key={i} className="alert-row alert-med">
-            <span className="alert-icon">⚠</span>
-            <div>
-              <div className="alert-label">{a.label}</div>
-              <div className="alert-detail">{a.detail}</div>
+      </div>
+    </Card>
+  );
+}
+
+/* ── Suppliers ── */
+function Suppliers({ list }: { list: ReturnType<typeof getSuppliers> }) {
+  const missing = list.filter(s => !s.company).length;
+  return (
+    <Card title="Suppliers" badge={`${missing} unconfirmed`} badgeRed={missing > 0} accent="#f0b40a" style={{ gridArea: 'suppliers' }}>
+      <div className="d2-supplier-list">
+        {list.map((s, i) => (
+          <div key={i} className="d2-supplier-row">
+            <div className="d2-sup-dept">{s.dept}</div>
+            <div className="d2-sup-company" style={{ color: s.company ? 'var(--text)' : '#ff4757' }}>
+              {s.company || 'TBD'}
             </div>
+            <div className="d2-sup-contact">{s.contact || '—'}</div>
+            <span style={{ color: s.company ? '#00ff88' : '#ff4757', fontWeight: 700, fontSize: 14 }}>
+              {s.company ? '✓' : '✗'}
+            </span>
           </div>
         ))}
       </div>
-    </Section>
+    </Card>
   );
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TEAM ROSTER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function TeamRoster() {
-  const team = getTeam();
-  const confirmed = team.filter(t => t.firstName);
-  const missing   = team.filter(t => !t.firstName);
-
-  return (
-    <Section
-      title="Production Team"
-      badge={`${confirmed.length} / ${team.length} assigned`}
-      badgeRed={missing.length > 0}
-      accent="#a855f7"
-    >
-      <div style={{ padding: '10px 18px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {team.map((m, i) => {
-          const name = [m.firstName, m.lastName].filter(Boolean).join(' ');
-          const ok = !!m.firstName;
-          return (
-            <div key={i} className={`team-row ${ok ? '' : 'team-row-missing'}`}>
-              <div className="team-row-avatar" style={{
-                background: ok ? 'linear-gradient(135deg,#a855f7,#7c3aed)' : 'transparent',
-                border: ok ? 'none' : '1px dashed #4a5568',
-                color: ok ? '#fff' : '#ff4757',
-              }}>
-                {ok ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '?'}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="team-row-role">{m.role}</div>
-                <div className="team-row-name" style={{ color: ok ? 'var(--text)' : '#ff4757' }}>
-                  {ok ? name : 'TBD — Unassigned'}
-                </div>
-              </div>
-              {ok && m.phone && <div className="team-row-phone">{m.phone}</div>}
-              {!ok && <span className="tbd-flag">TBD</span>}
-            </div>
-          );
-        })}
-      </div>
-    </Section>
-  );
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SUPPLIER STATUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function SupplierStatus() {
-  const suppliers = getSuppliers();
-  const confirmed = suppliers.filter(s => s.company);
-  const missing   = suppliers.filter(s => !s.company);
-
-  return (
-    <Section
-      title="Suppliers & Companies"
-      badge={`${missing.length} unconfirmed`}
-      badgeRed={missing.length > 0}
-      accent="#f0b40a"
-    >
-      <div style={{ padding: '8px 18px 14px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              {['Discipline', 'Company', 'Contact', ''].map((h, i) => (
-                <th key={i} style={{ padding: '6px 8px 8px', textAlign: 'left', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((s, i) => {
-              const ok = !!s.company;
-              return (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border)', opacity: ok ? 1 : 0.85 }}>
-                  <td style={{ padding: '8px 8px', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>{s.dept}</td>
-                  <td style={{ padding: '8px 8px', fontWeight: 500, color: ok ? 'var(--text)' : '#ff4757' }}>{s.company || 'TBD'}</td>
-                  <td style={{ padding: '8px 8px', color: 'var(--text-secondary)', fontSize: 11 }}>{s.contact || '—'}</td>
-                  <td style={{ padding: '8px 8px', textAlign: 'center', fontWeight: 700, color: ok ? '#00ff88' : '#ff4757', fontSize: 14 }}>{ok ? '✓' : '✗'}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </Section>
-  );
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   DISCIPLINE QUICK LINKS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-const DEPT_ICONS: Record<string, string> = {
-  OVERVIEW: '🏛', Sheet1: '📅', AUDIO: '🔊', LIGHTING: '💡',
-  'VIDEO - LED': '🖥', LASER: '⚡', 'SFX - PYRO': '🔥',
-  POWER: '⚡', RIGGING: '🔩', BACKLINE: '🎸', BROADCAST: '📡', STAGING: '🏗',
-};
-const DEPT_COLORS: Record<string, string> = {
+/* ── Discipline quick links ── */
+const D_COLOR: Record<string, string> = {
   AUDIO: '#00d4ff', LIGHTING: '#f0b40a', 'VIDEO - LED': '#a855f7',
   LASER: '#00ff88', 'SFX - PYRO': '#ff6b35', POWER: '#ff4757',
-  RIGGING: '#8892a4', BACKLINE: '#00d4ff', BROADCAST: '#a855f7', STAGING: '#f0b40a',
+  RIGGING: '#8892a4', BACKLINE: '#00d4ff', BROADCAST: '#a855f7',
+  STAGING: '#f0b40a', Sheet1: '#667085',
+};
+const D_ICON: Record<string, string> = {
+  Sheet1: '📅', AUDIO: '🔊', LIGHTING: '💡', 'VIDEO - LED': '🖥',
+  LASER: '⚡', 'SFX - PYRO': '🔥', POWER: '⚡', RIGGING: '🔩',
+  BACKLINE: '🎸', BROADCAST: '📡', STAGING: '🏗',
 };
 
-function DisciplineGrid() {
-  const depts = TAB_NAMES.filter(t => t !== 'OVERVIEW');
+function Disciplines() {
+  const depts = TAB_NAMES.filter(t => t !== 'OVERVIEW') as string[];
   return (
-    <Section title="Discipline Sheets" badge={`${depts.length} tabs`} accent="#00d4ff">
-      <div className="dept-grid" style={{ padding: '12px 18px 16px' }}>
+    <Card title="Discipline Sheets" badge={`${depts.length} tabs`} accent="#00d4ff" style={{ gridArea: 'depts' }}>
+      <div className="d2-dept-grid">
         {depts.map(tab => {
           const data = EMBEDDED_SHEET_DATA[tab as keyof typeof EMBEDDED_SHEET_DATA];
-          const color = DEPT_COLORS[tab] || '#00d4ff';
-          const rows = data?.nonEmptyRows ?? 0;
-          const href = tab === 'Sheet1' ? '/sheet/Sheet1' : `/sheet/${encodeURIComponent(tab)}`;
+          const color = D_COLOR[tab] || '#00d4ff';
           return (
-            <Link key={tab} href={href} className="dept-chip" style={{ '--dept-color': color } as React.CSSProperties}>
-              <span className="dept-icon">{DEPT_ICONS[tab] || '📋'}</span>
-              <span className="dept-info">
-                <span className="dept-name">{tab === 'Sheet1' ? 'SCHEDULE' : tab}</span>
-                <span className="dept-rows">{rows} rows</span>
-              </span>
-              <span className="dept-arrow">→</span>
+            <Link key={tab} href={`/sheet/${encodeURIComponent(tab)}`}
+              className="d2-dept-chip" style={{ '--dc': color } as React.CSSProperties}>
+              <span style={{ fontSize: 16 }}>{D_ICON[tab] || '📋'}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="d2-dept-name">{tab === 'Sheet1' ? 'SCHEDULE' : tab}</div>
+                <div className="d2-dept-rows">{data?.nonEmptyRows ?? 0} rows</div>
+              </div>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>→</span>
             </Link>
           );
         })}
       </div>
-    </Section>
+    </Card>
   );
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MAIN DASHBOARD
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MAIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 export function Dashboard() {
   const team      = getTeam();
   const suppliers = getSuppliers();
-  const alerts    = getAlerts();
-
-  const teamConf = team.filter(t => t.firstName).length;
-  const suppConf = suppliers.filter(s => s.company).length;
-
-  const kpis = [
-    { label: 'Event', value: 'EC26', sub: 'Electric Castle 2026', color: '#00d4ff' },
-    { label: 'Stage', value: 'MAIN', sub: 'Banffy Castle, Romania', color: '#00d4ff' },
-    { label: 'Team', value: `${teamConf}/${team.length}`, sub: `${team.length - teamConf} unassigned`, color: team.length - teamConf > 0 ? '#ff4757' : '#00ff88' },
-    { label: 'Suppliers', value: `${suppConf}/${suppliers.length}`, sub: `${suppliers.length - suppConf} TBD`, color: suppliers.length - suppConf > 0 ? '#f0b40a' : '#00ff88' },
-    { label: 'Actions', value: String(alerts.length), sub: `${alerts.filter(a => a.level === 'high').length} high priority`, color: '#ff4757' },
-  ];
+  const alerts    = getAlerts(team, suppliers);
+  const teamOk    = team.filter(t => t.name).length;
+  const suppOk    = suppliers.filter(s => s.company).length;
 
   return (
-    <div className="main-content dash-main">
-
-      {/* ── Hero ── */}
-      <div className="dash-hero" style={{ marginBottom: 18 }}>
-        <div className="dash-hero-scan" />
-        <div className="dash-hero-inner">
-          <div className="dash-eyebrow"><span className="eyebrow-dot" />EC26 · MAINSTAGE · ADVANCING BRIEF</div>
-          <h1 className="dash-title">Electric Castle 2026</h1>
-          <p className="dash-sub">Banffy Castle Domain · Bonțida, Romania &nbsp;·&nbsp; Build 3 Jul → Show 17–19 Jul → Strike 26 Jul</p>
+    <div className="main-content d2-page">
+      {/* Hero */}
+      <div className="d2-hero">
+        <div className="d2-hero-scan" />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div className="d2-eyebrow"><span className="d2-dot" />EC26 · MAINSTAGE ADVANCING</div>
+          <h1 className="d2-title">Electric Castle 2026</h1>
+          <p className="d2-sub">Banffy Castle Domain · Bonțida, Romania · 3 Jul – 26 Jul 2026</p>
         </div>
       </div>
 
-      {/* ── KPI Strip ── */}
-      <div className="db-kpi-row" style={{ marginBottom: 18 }}>
-        {kpis.map((k, i) => (
-          <div key={k.label} className="db-kpi" style={{ animationDelay: `${i * 60}ms` }}>
-            <div className="db-kpi-label">{k.label}</div>
-            <div className="db-kpi-value" style={{ color: k.color, fontSize: 26 }}>{k.value}</div>
-            <div className="db-kpi-sub">{k.sub}</div>
+      {/* KPI bar — full width */}
+      <div className="d2-kpi-bar">
+        {[
+          { l: 'Event',      v: 'EC26',                                     c: '#00d4ff', s: 'Electric Castle' },
+          { l: 'Venue',      v: 'Mainstage',                                c: '#00d4ff', s: 'Banffy Castle, Romania' },
+          { l: 'Build',      v: '12 days',                                  c: '#00d4ff', s: '3 – 14 July 2026' },
+          { l: 'Show Days',  v: '3',                                        c: '#00ff88', s: '17 – 19 July 2026' },
+          { l: 'Team',       v: `${teamOk}/${team.length}`,                 c: teamOk < team.length ? '#ff4757' : '#00ff88', s: `${team.length - teamOk} unassigned` },
+          { l: 'Suppliers',  v: `${suppOk}/${suppliers.length}`,            c: suppOk < suppliers.length ? '#f0b40a' : '#00ff88', s: `${suppliers.length - suppOk} TBD` },
+          { l: 'Actions',    v: String(alerts.filter(a => a.level==='high').length), c: '#ff4757', s: 'high priority' },
+        ].map((k, i) => (
+          <div key={i} className="d2-kpi" style={{ animationDelay: `${i * 55}ms` }}>
+            <div className="d2-kpi-label">{k.l}</div>
+            <div className="d2-kpi-value" style={{ color: k.c }}>{k.v}</div>
+            <div className="d2-kpi-sub">{k.s}</div>
           </div>
         ))}
       </div>
 
-      {/* ── Main grid ── */}
-      <div className="db-grid">
-        {/* Left — timeline (tall) + discipline grid */}
-        <div className="db-col-left">
-          <Timeline />
-          <DisciplineGrid />
-        </div>
-
-        {/* Right — alerts + team + suppliers */}
-        <div className="db-col-right">
-          <Alerts />
-          <TeamRoster />
-          <SupplierStatus />
-        </div>
+      {/* Main layout grid */}
+      <div className="d2-layout">
+        <Timeline />
+        <Alerts   items={alerts} />
+        <Team     members={team} />
+        <Suppliers list={suppliers} />
+        <Disciplines />
       </div>
-
-      <p className="dash-footer-note">
-        NODAL TECHNICAL CONSULTANCY · EC26 ELECTRIC CASTLE MAINSTAGE · v01
-      </p>
     </div>
   );
 }

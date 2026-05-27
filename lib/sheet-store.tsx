@@ -37,7 +37,7 @@ interface StoreCtx {
   sync: () => Promise<void>;
 }
 
-const STORAGE_KEY = 'nodal_sheet_cache_v3';
+const STORAGE_KEY = 'nodal_sheet_cache_v4';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -186,6 +186,16 @@ export function SheetStoreProvider({ children }: { children: React.ReactNode }) 
       isSyncing.current = false;
     }
   }, [data]);
+
+  // Auto-sync on mount so users always get fresh data
+  const didAutoSync = useRef(false);
+  useEffect(() => {
+    if (!didAutoSync.current) {
+      didAutoSync.current = true;
+      sync();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SheetStoreContext.Provider value={{ data, status, lastSynced, isLive, sync }}>

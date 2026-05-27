@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   return NextResponse.json({
-    sheetId: process.env.GOOGLE_SHEET_ID || SHEET_ID,
+    sheetId: SHEET_ID,
     tabs: TAB_NAMES,
     embedded: true,
     data: EMBEDDED_SHEET_DATA,

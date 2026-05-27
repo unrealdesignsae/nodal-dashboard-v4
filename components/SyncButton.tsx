@@ -1,31 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { RefreshCw, CheckCircle, AlertCircle, Wifi } from 'lucide-react';
+import { useSync } from '@/lib/sheet-store';
 
-export function SyncButton({ tab }: { tab?: string }) {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'no-creds'>('idle');
-  const [lastSync, setLastSync] = useState<string | null>(null);
-
-  async function handleSync() {
-    setStatus('loading');
-    try {
-      const url = tab ? `/api/sheets/${encodeURIComponent(tab)}` : '/api/sheets';
-      const res = await fetch(url, { cache: 'no-store' });
-      const json = await res.json();
-      if (json.live === false && !tab) {
-        setStatus('no-creds');
-      } else if (json.live === false) {
-        setStatus('no-creds');
-      } else {
-        setStatus('ok');
-        setLastSync(new Date().toLocaleTimeString());
-      }
-    } catch {
-      setStatus('error');
-    }
-    setTimeout(() => setStatus('idle'), 4000);
-  }
+export function SyncButton() {
+  const { sync, status, lastSynced, isLive } = useSync();
 
   const icons = {
     idle: <RefreshCw size={14} />,
@@ -35,11 +14,11 @@ export function SyncButton({ tab }: { tab?: string }) {
     'no-creds': <Wifi size={14} />,
   };
   const labels = {
-    idle: 'Sync from Sheet',
+    idle: isLive ? `Live · ${lastSynced ?? ''}` : 'Sync from Sheet',
     loading: 'Syncing…',
-    ok: `Synced ${lastSync ?? ''}`,
-    error: 'Sync failed',
-    'no-creds': 'No API key set',
+    ok: `Synced ${lastSynced ?? ''}`,
+    error: 'Sync failed — retry?',
+    'no-creds': 'Sync error',
   };
   const colors: Record<string, string> = {
     ok: '#b8ff63',
@@ -50,14 +29,10 @@ export function SyncButton({ tab }: { tab?: string }) {
   return (
     <button
       className="btn secondary sync-btn"
-      onClick={handleSync}
+      onClick={sync}
       disabled={status === 'loading'}
       style={colors[status] ? { color: colors[status], borderColor: colors[status] + '66' } : {}}
-      title={
-        status === 'no-creds'
-          ? 'Add GOOGLE_SERVICE_ACCOUNT_EMAIL + GOOGLE_PRIVATE_KEY to Vercel env vars to enable live sync'
-          : 'Pull latest data from Google Sheets'
-      }
+      title="Pull latest data from Google Sheets"
     >
       {icons[status]} {labels[status]}
     </button>
